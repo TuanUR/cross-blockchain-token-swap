@@ -1,5 +1,5 @@
-var TokenSwap = artifacts.require("TokenSwap");
+var TokenSwapCoin = artifacts.require("TokenSwapCoin");
 
 module.exports = function(deployer) {
-    deployer.deploy(TokenSwap);
+    deployer.deploy(TokenSwapCoin);
 }

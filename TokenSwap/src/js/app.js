@@ -37,18 +37,18 @@ App = {
     // instantiate smart contract so web3 knows where to find it and
     // how it works => enables interacting with Ethereum via web3
     initContract: function () {
-        $.getJSON('../build/contracts/TokenSwap.json', function (data) {
+        $.getJSON('../build/contracts/TokenSwapCoin.json', function (data) {
             // Get the necessary contract artifact file
             // (= information about contract, e.g. deployed address etc.)
-            var TokenSwapArtifact = data;
+            var TokenSwapCoinArtifact = data;
             // instantiate truffle contract with TruffleContract()
-            App.contracts.TokenSwap = TruffleContract(TokenSwapArtifact);
+            App.contracts.TokenSwapCoin = TruffleContract(TokenSwapCoinArtifact);
             // set the web3 provider for the contract
-            App.contracts.TokenSwap.setProvider(App.web3Provider);
+            App.contracts.TokenSwapCoin.setProvider(App.web3Provider);
 
             // deployment for testing
-            App.contracts.TokenSwap.deployed().then(function(TokenSwap) {
-                console.log("Token address: ", TokenSwap.address);
+            App.contracts.TokenSwapCoin.deployed().then(function(TokenSwapCoin) {
+                console.log("Token address: ", TokenSwapCoin.address);
             });
 
         });
