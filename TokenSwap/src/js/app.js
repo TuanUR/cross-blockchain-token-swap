@@ -37,7 +37,7 @@ App = {
     // instantiate smart contract so web3 knows where to find it and
     // how it works => enables interacting with Ethereum via web3
     initContract: function () {
-        $.getJSON('TokenSwap.json', function (data) {
+        $.getJSON('../build/contracts/TokenSwap.json', function (data) {
             // Get the necessary contract artifact file
             // (= information about contract, e.g. deployed address etc.)
             var TokenSwapArtifact = data;
