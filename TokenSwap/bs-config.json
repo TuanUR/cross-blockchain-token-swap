@@ -1,0 +1,5 @@
+{
+  "server": {
+    "baseDir": ["./TokenSwap/src", "./TokenSwap/build/contracts"]
+  }
+}
