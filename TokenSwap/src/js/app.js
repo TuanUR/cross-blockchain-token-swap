@@ -2,6 +2,7 @@ App = {
 
     web3Provider: null,
     contracts: {},
+    account: '0x0',
 
 
     // init app
@@ -57,11 +58,22 @@ App = {
                 App.contracts.TokenSwapCoin.deployed().then(function (TokenSwapCoin) {
                     console.log("Token address: ", TokenSwapCoin.address);
                 });
+                return App.render();
             })
         });
+    },
+
+    render: function() {
+        // Load account data (account that is currently used e.g. on MetaMask)
+        web3.eth.getCoinbase(function(err, account){
+            if(err == null) {
+                console.log("account", account);
+                App.account = account;
+                //quering for the account address on the DOM
+                $('#accountAddress').html("Your Account: " + account);
+            }
+        })
     }
-
-
 }
 
 // whenever window loads, initialize app
