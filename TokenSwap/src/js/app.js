@@ -45,22 +45,15 @@ App = {
             App.contracts.HashedTimelockERC20 = TruffleContract(HashedTimelockERC20Artifact);
             // set the web3 provider for the contract
             App.contracts.HashedTimelockERC20.setProvider(App.web3Provider);
-
             // deployment for testing
             App.contracts.HashedTimelockERC20.deployed().then(function (HashedTimelockERC20) {
-                console.log("Token address: ", HashedTimelockERC20.address);
+                console.log("HashedTimelock contract address: ", HashedTimelockERC20.address);
             });
         }).done(function () {
             $.getJSON('../build/contracts/TokenSwapCoin.json', function (data) {
-                // Get the necessary contract artifact file
-                // (= information about contract, e.g. deployed address etc.)
                 var TokenSwapCoinArtifact = data;
-                // instantiate truffle contract with TruffleContract()
                 App.contracts.TokenSwapCoin = TruffleContract(TokenSwapCoinArtifact);
-                // set the web3 provider for the contract
                 App.contracts.TokenSwapCoin.setProvider(App.web3Provider);
-
-                // deployment for testing
                 App.contracts.TokenSwapCoin.deployed().then(function (TokenSwapCoin) {
                     console.log("Token address: ", TokenSwapCoin.address);
                 });
