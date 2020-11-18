@@ -37,20 +37,34 @@ App = {
     // instantiate smart contract so web3 knows where to find it and
     // how it works => enables interacting with Ethereum via web3
     initContract: function () {
-        $.getJSON('../build/contracts/TokenSwapCoin.json', function (data) {
+        $.getJSON('../build/contracts/HashedTimelockERC20.json', function (data) {
             // Get the necessary contract artifact file
             // (= information about contract, e.g. deployed address etc.)
-            var TokenSwapCoinArtifact = data;
+            var HashedTimelockERC20Artifact = data;
             // instantiate truffle contract with TruffleContract()
-            App.contracts.TokenSwapCoin = TruffleContract(TokenSwapCoinArtifact);
+            App.contracts.HashedTimelockERC20 = TruffleContract(HashedTimelockERC20Artifact);
             // set the web3 provider for the contract
-            App.contracts.TokenSwapCoin.setProvider(App.web3Provider);
+            App.contracts.HashedTimelockERC20.setProvider(App.web3Provider);
 
             // deployment for testing
-            App.contracts.TokenSwapCoin.deployed().then(function(TokenSwapCoin) {
-                console.log("Token address: ", TokenSwapCoin.address);
+            App.contracts.HashedTimelockERC20.deployed().then(function (HashedTimelockERC20) {
+                console.log("Token address: ", HashedTimelockERC20.address);
             });
+        }).done(function () {
+            $.getJSON('../build/contracts/TokenSwapCoin.json', function (data) {
+                // Get the necessary contract artifact file
+                // (= information about contract, e.g. deployed address etc.)
+                var TokenSwapCoinArtifact = data;
+                // instantiate truffle contract with TruffleContract()
+                App.contracts.TokenSwapCoin = TruffleContract(TokenSwapCoinArtifact);
+                // set the web3 provider for the contract
+                App.contracts.TokenSwapCoin.setProvider(App.web3Provider);
 
+                // deployment for testing
+                App.contracts.TokenSwapCoin.deployed().then(function (TokenSwapCoin) {
+                    console.log("Token address: ", TokenSwapCoin.address);
+                });
+            })
         });
     }
 

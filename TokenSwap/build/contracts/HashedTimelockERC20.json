@@ -12920,9 +12920,99 @@
     "name": "solc",
     "version": "0.6.12+commit.27d51765.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "5777": {
+      "events": {
+        "0xc625233bff3f654cd1dae30bcb70eba05af6361cddc69e8d429d2c0b2d64e0ce": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "contractId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "secretKey",
+              "type": "bytes32"
+            }
+          ],
+          "name": "claimedSwap",
+          "type": "event"
+        },
+        "0x3fa709a0311217edaeaea55c71df90ea8dd060114921fe83fa18b1feb4e19457": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "contractId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "tokenContract",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "tokenAmount",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "hashlock",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "timelock",
+              "type": "uint256"
+            }
+          ],
+          "name": "newSwap",
+          "type": "event"
+        },
+        "0xfb5d3f0aa0cba05f52d3654cbe6db43991aa08412e34a9514bba17d963111eb4": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "contractId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "refundedSwap",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x87E531194fA90cAC7496b1Aa4039dcf60d67c40D",
+      "transactionHash": "0x1ff9ebfa16c9a2bc8bf7742ee16a500768f2d8d9451360c19cecef422e2806a6"
+    }
+  },
   "schemaVersion": "3.2.5",
-  "updatedAt": "2020-11-12T14:15:21.478Z",
+  "updatedAt": "2020-11-18T09:16:55.202Z",
+  "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
     "methods": {},
