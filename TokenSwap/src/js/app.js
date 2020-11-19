@@ -4,6 +4,7 @@ App = {
     contracts: {},
     account: '0x0',
     loading: false,
+    tokenPrice: 0,
 
 
     // init app
@@ -64,7 +65,7 @@ App = {
         });
     },
 
-    //acts as function that renders the entire app
+    // acts as function that renders the entire app
     render: function () {
         if (App.loading) {
             return;
@@ -74,15 +75,30 @@ App = {
         var loader = $('#loader');
         var content = $('#content');
 
+        loader.show();
+        content.hide();
+
         // Load account data (account that is currently used e.g. on MetaMask)
         web3.eth.getCoinbase(function (err, account) {
             if (err == null) {
                 console.log("account", account);
                 App.account = account;
-                //quering for the account address on the DOM
+                // quering for the account address on the DOM
                 $('#accountAddress').html("Your Account: " + account);
             }
         })
+        App.contracts.TokenSwapCoin.deployed().then(function(instance) {
+            TokenSwapCoinInstance = instance;
+            return TokenSwapCoinInstance.totalSupply();
+        }).then(function (totalSupply) {
+            App.totalSupply = totalSupply;
+            $('.token-totalSupply').html(App.totalSupply);
+            console.log("Total supply: ", totalSupply.toNumber());
+        })
+        // show everything
+        App.loading = false;
+        loader.hide();
+        content.show();
     }
 }
 
