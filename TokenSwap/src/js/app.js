@@ -79,14 +79,25 @@ App = {
         content.hide();
 
         // Load account data (account that is currently used e.g. on MetaMask)
-        web3.eth.getCoinbase(function (err, account) {
-            if (err == null) {
-                console.log("account", account);
+        web3.eth.getAccounts(function (err, account) {
+            if (err) {
+                console.log(err);
+            } else {
+                // for test purposes only
+                console.log("account", account[0]);
                 App.account = account;
                 // quering for the account address on the DOM
                 $('#accountAddress').html("Your Account: " + account);
             }
-        })
+        })/*.then(function() {
+            web3.eth.getBalance(function(err, balance) {
+                if (err = null) {
+                    console.log("Balance: ", balance);
+                    App.balance = balance;
+                    $('#content.dapp-balance').html(App.balance);
+                }
+            })
+        })*/
         App.contracts.TokenSwapCoin.deployed().then(function (instance) {
             TokenSwapCoinInstance = instance;
             return TokenSwapCoinInstance.totalSupply();
