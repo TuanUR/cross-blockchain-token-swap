@@ -90,28 +90,23 @@ App = {
                 // quering for the account address on the DOM
                 $('#accountAddress').html("Your Account: " + account);
             }
-        })/*.then(function() {
-            web3.eth.getBalance(function(err, balance) {
-                if (err = null) {
-                    console.log("Balance: ", balance);
-                    App.balance = balance;
-                    $('#content.dapp-balance').html(App.balance);
-                }
-            })
-        })*/
+        })
         // display total token supply on the whole network
         App.contracts.TokenSwapCoin.deployed().then(function (instance) {
             TokenSwapCoinInstance = instance;
             return TokenSwapCoinInstance.totalSupply();
         }).then(function (totalSupply) {
             App.totalSupply = totalSupply;
-            $('#token-totalSupply').html("Total Supply on the Network (Token): " +
-                App.totalSupply.toNumber());
+            $('#token-totalSupply').html(App.totalSupply.toNumber());
             return TokenSwapCoinInstance.address;
         }).then(function (tokenContractAddress) {
             App.tokenContractAddress = tokenContractAddress;
             $('#tokenContractAddress').html("Token Contract Address on the Network (Token): " +
                 App.tokenContractAddress);
+            return TokenSwapCoinInstance.symbol();
+        }).then(function(symbol) {
+            //$('#token-balance').html("You currently have " + balance.toNumber() + " Token");
+            $('.token-symbol').html(symbol);
             return TokenSwapCoinInstance.balanceOf(App.account);
         })
         .then(function(balance) {
