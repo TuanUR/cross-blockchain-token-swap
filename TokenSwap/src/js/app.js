@@ -87,13 +87,12 @@ App = {
                 $('#accountAddress').html("Your Account: " + account);
             }
         })
-        App.contracts.TokenSwapCoin.deployed().then(function(instance) {
+        App.contracts.TokenSwapCoin.deployed().then(function (instance) {
             TokenSwapCoinInstance = instance;
             return TokenSwapCoinInstance.totalSupply();
         }).then(function (totalSupply) {
             App.totalSupply = totalSupply;
-            $('.token-totalSupply').html(App.totalSupply);
-            console.log("Total supply: ", totalSupply.toNumber());
+            $('#token-totalSupply').html("Total Supply on the Network (Token): " + App.totalSupply.toNumber());
         })
         // show everything
         App.loading = false;
