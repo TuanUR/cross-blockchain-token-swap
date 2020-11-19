@@ -3,6 +3,7 @@ App = {
     web3Provider: null,
     contracts: {},
     account: '0x0',
+    loading: false,
 
 
     // init app
@@ -63,10 +64,19 @@ App = {
         });
     },
 
-    render: function() {
+    //acts as function that renders the entire app
+    render: function () {
+        if (App.loading) {
+            return;
+        }
+        App.loading = true;
+
+        var loader = $('#loader');
+        var content = $('#content');
+
         // Load account data (account that is currently used e.g. on MetaMask)
-        web3.eth.getCoinbase(function(err, account){
-            if(err == null) {
+        web3.eth.getCoinbase(function (err, account) {
+            if (err == null) {
                 console.log("account", account);
                 App.account = account;
                 //quering for the account address on the DOM
