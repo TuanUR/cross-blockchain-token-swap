@@ -59,6 +59,7 @@ App = {
                 App.contracts.TokenSwapCoin.setProvider(App.web3Provider);
                 App.contracts.TokenSwapCoin.deployed().then(function (TokenSwapCoin) {
                     console.log("Token address: ", TokenSwapCoin.address);
+
                 });
                 return App.render();
             })
@@ -98,12 +99,25 @@ App = {
                 }
             })
         })*/
+        // display total token supply on the whole network
         App.contracts.TokenSwapCoin.deployed().then(function (instance) {
             TokenSwapCoinInstance = instance;
             return TokenSwapCoinInstance.totalSupply();
         }).then(function (totalSupply) {
             App.totalSupply = totalSupply;
-            $('#token-totalSupply').html("Total Supply on the Network (Token): " + App.totalSupply.toNumber());
+            $('#token-totalSupply').html("Total Supply on the Network (Token): " +
+                App.totalSupply.toNumber());
+            return TokenSwapCoinInstance.address;
+        }).then(function (tokenContractAddress) {
+            App.tokenContractAddress = tokenContractAddress;
+            $('#tokenContractAddress').html("Token Contract Address on the Network (Token): " +
+                App.tokenContractAddress);
+            return TokenSwapCoinInstance.balanceOf(App.account);
+        })
+        .then(function(balance) {
+            //$('#token-balance').html("You currently have " + balance.toNumber() + " Token");
+            $('#token-balance').html(balance.toNumber());
+            console.log(balance.toNumber());
         })
         // show everything
         App.loading = false;
