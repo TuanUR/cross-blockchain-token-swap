@@ -14,7 +14,7 @@ contract HashedTimelockERC20 {
         uint256 timelock
     );
 
-    event claimedSwap(bytes32 indexed contractId, bytes32 secretKey);
+    event claimedSwap(bytes32 indexed contractId, string secretKey);
 
     event refundedSwap(bytes32 indexed contractId);
 
@@ -24,7 +24,7 @@ contract HashedTimelockERC20 {
         address tokenContract;
         uint256 tokenAmount;
         bytes32 hashlock;
-        bytes32 secretKey;
+        string secretKey;
         uint256 timelock;
         bool claimed;
         bool refunded;
@@ -41,12 +41,13 @@ contract HashedTimelockERC20 {
     ) public returns(bytes32 contractId) {
         require(ERC20(_tokenContract).allowance(msg.sender, address(this)) >= _tokenAmount, "token allowance must be > token amount");
         // require(ERC20(_tokenContract).balanceOf(msg.sender) >= _tokenAmount, "token amount exceeds balance");
-        require(_timelock > 0, "timelock has to be in the future");
+        require(_timelock > block.timestamp, "timelock has to be in the future");
         require(_tokenAmount > 0, "token amount must be > 0");
         
-        uint256 timelocked = block.timestamp + _timelock;
+        // does not work well with test :(
+        //uint256 timelocked = block.timestamp + _timelock;
 
-        contractId = sha256(abi.encodePacked(msg.sender, _receiver, _tokenContract, _hashlock, timelocked, _tokenAmount));
+        contractId = sha256(abi.encodePacked(msg.sender, _receiver, _tokenContract, _hashlock, _timelock, _tokenAmount));
         
         if(existingHTLC(contractId)){
             revert("Contract already exists, use different parameters, ideally a different hashlock");
@@ -57,7 +58,7 @@ contract HashedTimelockERC20 {
         }
 
         /*
-        if(!ERC20(_tokenContract).transfer(address(this), _tokenAmount), {from: accounts[0]}) {
+        if(!ERC20(_tokenContract).transfer(address(this), _tokenAmount), {from: msg.sender}) {
             revert("transfer to this failed");
         }
         */
@@ -68,8 +69,8 @@ contract HashedTimelockERC20 {
             _tokenContract,
             _tokenAmount,
             _hashlock,
-            0x0,
-            timelocked,
+            "",
+            _timelock,
             false,
             false
         );
@@ -81,11 +82,11 @@ contract HashedTimelockERC20 {
             _tokenContract,
             _tokenAmount,
             _hashlock,
-            timelocked
+            _timelock
         );
     }
 
-    function claim(bytes32 _contractId, bytes32 _secretKey) 
+    function claim(bytes32 _contractId, string memory _secretKey) 
         external
         contractNeitherClaimedNorRefunded(_contractId)
         contractExists(_contractId) returns (bool)
@@ -113,7 +114,7 @@ contract HashedTimelockERC20 {
         require(contracts[_contractId].sender == msg.sender, "not sender");
         // require(contracts[_contractId].claimed == false, "already claimed");
         // require(contracts[_contractId].refunded == false, "already refunded");
-        require(contracts[_contractId].timelock <= block.timestamp, "timelock still active");
+        require(contracts[_contractId].timelock < block.timestamp, "timelock still active");
 
         HTLC storage a = contracts[_contractId];
         ERC20(a.tokenContract).transfer(a.sender, a.tokenAmount);
@@ -124,15 +125,15 @@ contract HashedTimelockERC20 {
     }
 
     function getContract(bytes32 _contractId) 
-        public   
-        view
+        public
+        view   
         contractExists(_contractId) returns(
             address sender,
             address receiver,
             address tokenContract,
             uint256 tokenAmount,
             bytes32 hashlock,
-            bytes32 secretKey,
+            string memory secretKey,
             uint256 timelock,
             bool claimed,
             bool refunded
