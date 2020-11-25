@@ -34,12 +34,12 @@ App = {
             App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
         }
         web3 = new Web3(App.web3Provider);
-        return App.initContract();
+        return App.accessContracts();
     },
 
     // instantiate smart contract so web3 knows where to find it and
     // how it works => enables interacting with Ethereum via web3
-    initContract: function () {
+    accessContracts: function () {
         $.getJSON('../build/contracts/HashedTimelockERC20.json', function (data) {
             // Get the necessary contract artifact file
             // (= information about contract, e.g. deployed address etc.)
@@ -61,9 +61,19 @@ App = {
                     console.log("Token address: ", TokenSwapCoin.address);
 
                 });
-              //  return App.render();
+                //  return App.render();
+                return App.testContracts();
             })
         });
+    },
+
+    testContracts: function () {
+        App.contracts.TokenSwapCoin.at("0x3ef96443Cc84f06d74E726B8bef9E63C4A60037c").then(function (TokenSwapCoin) {
+            return TokenSwapCoin.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
+        }).then(function (balance) {
+            console.log(balance.toNumber());
+        })
+
     },
 
     // acts as function that renders the entire app
@@ -104,16 +114,16 @@ App = {
             $('#tokenContractAddress').html("Token Contract Address on the Network (Token): " +
                 App.tokenContractAddress);
             return TokenSwapCoinInstance.symbol();
-        }).then(function(symbol) {
+        }).then(function (symbol) {
             //$('#token-balance').html("You currently have " + balance.toNumber() + " Token");
             $('.token-symbol').html(symbol);
             return TokenSwapCoinInstance.balanceOf(App.account);
         })
-        .then(function(balance) {
-            //$('#token-balance').html("You currently have " + balance.toNumber() + " Token");
-            $('#token-balance').html(balance.toNumber());
-            console.log(balance.toNumber());
-        })
+            .then(function (balance) {
+                //$('#token-balance').html("You currently have " + balance.toNumber() + " Token");
+                $('#token-balance').html(balance.toNumber());
+                console.log(balance.toNumber());
+            })
         // show everything
         App.loading = false;
         loader.hide();
