@@ -62,7 +62,7 @@ App = {
 
                 });
                 //  return App.render();
-                return App.testContracts();
+                return App.renderStartpage();
             })
         });
     },
@@ -74,6 +74,22 @@ App = {
             console.log(balance.toNumber());
         })
 
+    },
+
+    // render the startpage, where the user enters the contract addresses he deployed on the blockchain
+    renderStartpage: function() {
+        var startpage = $('#startpage');
+        var homepage = $('#content')
+        startpage.show();
+        homepage.hide();
+
+    },
+
+    renderHomepage: function() {
+        var startpage = $('#startpage');
+        var homepage = $('#content')
+        startpage.hide();
+        homepage.show();
     },
 
     // acts as function that renders the entire app
