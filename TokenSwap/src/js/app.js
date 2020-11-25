@@ -34,11 +34,12 @@ App = {
             App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
         }
         web3 = new Web3(App.web3Provider);
-        return App.accessContracts();
+        return App.renderStartpage();
     },
 
     // instantiate smart contract so web3 knows where to find it and
     // how it works => enables interacting with Ethereum via web3
+    //FIXME
     accessContracts: function () {
         $.getJSON('../build/contracts/HashedTimelockERC20.json', function (data) {
             // Get the necessary contract artifact file
@@ -48,8 +49,11 @@ App = {
             App.contracts.HashedTimelockERC20 = TruffleContract(HashedTimelockERC20Artifact);
             // set the web3 provider for the contract
             App.contracts.HashedTimelockERC20.setProvider(App.web3Provider);
+
+            //FIXME get input contract address from user
+            var input_address = ('#input-address-htlc');
             // deployment for testing
-            App.contracts.HashedTimelockERC20.at("0x87E531194fA90cAC7496b1Aa4039dcf60d67c40D").then(function (HashedTimelockERC20) {
+            App.contracts.HashedTimelockERC20.at(input_address).then(function (HashedTimelockERC20) {
                 console.log("HashedTimelock contract address: ", HashedTimelockERC20.address);
             });
         }).done(function () {
@@ -62,7 +66,7 @@ App = {
 
                 });
                 //  return App.render();
-                return App.renderStartpage();
+                return App.renderHomepage();
             })
         });
     },

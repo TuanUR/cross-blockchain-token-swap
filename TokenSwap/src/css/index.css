@@ -12,3 +12,7 @@
     font-weight: bold;
     color: red;
 }
+
+#startpage {
+    display: none;
+}

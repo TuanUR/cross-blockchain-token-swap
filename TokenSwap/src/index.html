@@ -15,13 +15,9 @@
             <h1 class="text-center">Cross Chain Token Swap</h1>
             <br/>
         </div>
-        <div id="startpage">
-            <p class="text-center">THIS IS THE START PAGE</p>
-            <button onClick=App.renderHomepage()>Continue to Homepage</button>
-        </div>
-        <div id="content" class="text-center" style="display: none;">
+        <div id="startpage" class="text-center" >
             <p class="introduction">Welcome to the Hash Timelocked Cross-Chain Token-Swap (HTLC)</p>
-            <p>Enter details below to proceed to the swap.</p>
+            <p>Enter details below to proceed to the swap functions</p>
             <p>You currently have <span id="token-balance"></span>
                 [ <span class="token-symbol"></span>
                 Token ]
@@ -30,24 +26,23 @@
             <form role="form"></form>
             <div class="form-group">
                 <div class="input-group">
-                    Receiver Address :
-                    <input type="text" id="receiverAddress" class="form-control input-lg" name="addressReceiver"
+                    Hashed Timelock Contract Address:
+                    <input type="text" id="input-address-htlc" class="form-control input-lg" name="addressReceiver"
                            placeholder="0x0">
-                    </br>Hashlock :
+                    </br>Associated ERC20 Contract Address:
                     <input id="hashlock" class="form-control input-lg" type="number"
-                           name="hashlock" placeholder="Sha256"/>
-                    </br>Timelock :
-                    <input id="timelock" class="form-control input-lg" type="number"
-                           name="timelock" placeholder="seconds"/>
-                    </br>Token Amount :
-                    <input id="numberOfToken" class="form-control input-lg" type="number"
-                           name="numberOfToken" value="1" min="1" pattern="[0-9]" placeholder="Token Amount"/>
+                           name="hashlock" placeholder="0x0"/>
+                    </br>
                     <span class="input-group-btn">
                             <!--implement link to success page with contract details?-->
-                            <button type="submit" class="btn btn-success btn-lg">Swap Tokens</button>
+                            <button type="submit" onclick="App.accessContracts()" class="btn btn-success btn-lg">Interact with your contract</button>
                         </span>
                 </div>
             </div>
+        </div>
+        <div id="content" class="text-center" style="display: none;">
+
+            <!--progress bar to show how much time of timelock has passed?-->
             <div class="progress">
                 <div id="progress" class="progress-bar progress-bar-striped-active"
                      aria-valuemin="0" aria-valuemax="100">
@@ -60,7 +55,6 @@
             <hr>
             <p id="accountAddress"></p>
             <p id="tokenContractAddress"></p>
-
         </div>
     </div>
 </div>
