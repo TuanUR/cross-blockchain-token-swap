@@ -37,6 +37,10 @@ App = {
         return App.renderStartpage();
     },
 
+    testSubmit: function() {
+        console.log("form was correctly sent and function executed");
+    },
+
     // instantiate smart contract so web3 knows where to find it and
     // how it works => enables interacting with Ethereum via web3
     //FIXME
@@ -51,9 +55,11 @@ App = {
             App.contracts.HashedTimelockERC20.setProvider(App.web3Provider);
 
             //FIXME get input contract address from user
-            var input_address = ('#input-address-htlc');
+            console.log("accessContracts was executed");
+            var input_address = $('#input-address-htlc').val();
+            //console.log('"' + input_address + '"');
             // deployment for testing
-            App.contracts.HashedTimelockERC20.at(input_address).then(function (HashedTimelockERC20) {
+            App.contracts.HashedTimelockERC20.at("0x87E531194fA90cAC7496b1Aa4039dcf60d67c40D").then(function (HashedTimelockERC20) {
                 console.log("HashedTimelock contract address: ", HashedTimelockERC20.address);
             });
         }).done(function () {
@@ -86,7 +92,6 @@ App = {
         var homepage = $('#content')
         startpage.show();
         homepage.hide();
-
     },
 
     renderHomepage: function() {

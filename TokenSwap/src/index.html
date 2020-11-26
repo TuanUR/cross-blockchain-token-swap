@@ -15,7 +15,7 @@
             <h1 class="text-center">Cross Chain Token Swap</h1>
             <br/>
         </div>
-        <div id="startpage" class="text-center" >
+        <div id="startpage" class="text-center">
             <p class="introduction">Welcome to the Hash Timelocked Cross-Chain Token-Swap (HTLC)</p>
             <p>Enter details below to proceed to the swap functions</p>
             <p>You currently have <span id="token-balance"></span>
@@ -23,22 +23,23 @@
                 Token ]
             </p>
             <br/>
-            <form role="form"></form>
-            <div class="form-group">
-                <div class="input-group">
-                    Hashed Timelock Contract Address:
-                    <input type="text" id="input-address-htlc" class="form-control input-lg" name="addressReceiver"
-                           placeholder="0x0">
-                    </br>Associated ERC20 Contract Address:
-                    <input id="hashlock" class="form-control input-lg" type="number"
-                           name="hashlock" placeholder="0x0"/>
-                    </br>
-                    <span class="input-group-btn">
+            <form onSubmit="App.accessContracts(); return false;" role="form">
+                <div class="form-group">
+                    <div class="input-group">
+                        Hashed Timelock Contract Address:
+                        <input type="text" id="input-address-htlc" class="form-control input-lg"
+                               name="addressHtlc" placeholder="0x0">
+                        </br>Associated ERC20 Contract Address:
+                        <input id="hashlock" class="form-control input-lg" type="number"
+                               name="hashlock" placeholder="0x0"/>
+                        </br>
+                        <span class="input-group-btn">
                             <!--implement link to success page with contract details?-->
-                            <button type="submit" onclick="App.accessContracts()" class="btn btn-success btn-lg">Interact with your contract</button>
+                            <button type="submit" class="btn btn-success btn-lg">Interact with your contract</button>
                         </span>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
         <div id="content" class="text-center" style="display: none;">
 
