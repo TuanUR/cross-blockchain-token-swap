@@ -56,10 +56,11 @@ App = {
 
             //FIXME get input contract address from user
             console.log("accessContracts was executed");
-            var input_address = $('#input-address-htlc').val();
+            var input_address_htlc = $('#input-address-htlc').val();
             //console.log('"' + input_address + '"');
             // deployment for testing
-            App.contracts.HashedTimelockERC20.at("0x87E531194fA90cAC7496b1Aa4039dcf60d67c40D").then(function (HashedTimelockERC20) {
+            // current htlc address: 0x6c3DB88E97dA81f4B7CD49f68FaC6A2430222380
+            App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
                 console.log("HashedTimelock contract address: ", HashedTimelockERC20.address);
             });
         }).done(function () {
@@ -67,9 +68,10 @@ App = {
                 var TokenSwapCoinArtifact = data;
                 App.contracts.TokenSwapCoin = TruffleContract(TokenSwapCoinArtifact);
                 App.contracts.TokenSwapCoin.setProvider(App.web3Provider);
-                App.contracts.TokenSwapCoin.at("0x3ef96443Cc84f06d74E726B8bef9E63C4A60037c").then(function (TokenSwapCoin) {
+                var input_address_token = $('#input-address-token').val();
+                // current token address: 0x3a882dc305682f10A992fbC50C8C2E03eCb7b260
+                App.contracts.TokenSwapCoin.at(input_address_token).then(function (TokenSwapCoin) {
                     console.log("Token address: ", TokenSwapCoin.address);
-
                 });
                 //  return App.render();
                 return App.renderHomepage();
@@ -78,8 +80,11 @@ App = {
     },
 
     testContracts: function () {
-        App.contracts.TokenSwapCoin.at("0x3ef96443Cc84f06d74E726B8bef9E63C4A60037c").then(function (TokenSwapCoin) {
-            return TokenSwapCoin.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
+        console.log("testContracts was executed");
+        var input_address_token = $('#input-address-token').val();
+        App.contracts.TokenSwapCoin.at(input_address_token).then(function (TokenSwapCoin) {
+            var user_account = $('#accountAddress').val();
+            return TokenSwapCoin.balanceOf("0x31281336c2e70E1D816b0be3f7b036Dbd14308d8");
         }).then(function (balance) {
             console.log(balance.toNumber());
         })
@@ -92,6 +97,17 @@ App = {
         var homepage = $('#content')
         startpage.show();
         homepage.hide();
+
+        // Load account data (account that is currently used e.g. on MetaMask)
+        web3.eth.getAccounts(function (err, account) {
+            if (err) {
+                console.log(err);
+            } else {
+                App.account = account;
+                // quering for the account address on the DOM
+                $('#accountAddress').html(account);
+            }
+        })
     },
 
     renderHomepage: function() {
@@ -99,6 +115,7 @@ App = {
         var homepage = $('#content')
         startpage.hide();
         homepage.show();
+        return App.testContracts();
     },
 
     // acts as function that renders the entire app
@@ -114,18 +131,8 @@ App = {
         loader.show();
         content.hide();
 
-        // Load account data (account that is currently used e.g. on MetaMask)
-        web3.eth.getAccounts(function (err, account) {
-            if (err) {
-                console.log(err);
-            } else {
-                // for test purposes only
-                console.log("account", account[0]);
-                App.account = account;
-                // quering for the account address on the DOM
-                $('#accountAddress').html("Your Account: " + account);
-            }
-        })
+
+        /*
         // display total token supply on the whole network
         App.contracts.TokenSwapCoin.deployed().then(function (instance) {
             TokenSwapCoinInstance = instance;
@@ -153,6 +160,8 @@ App = {
         App.loading = false;
         loader.hide();
         content.show();
+
+         */
     }
 }
 

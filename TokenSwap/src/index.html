@@ -18,20 +18,19 @@
         <div id="startpage" class="text-center">
             <p class="introduction">Welcome to the Hash Timelocked Cross-Chain Token-Swap (HTLC)</p>
             <p>Enter details below to proceed to the swap functions</p>
-            <p>You currently have <span id="token-balance"></span>
-                [ <span class="token-symbol"></span>
-                Token ]
+            <p>You are signed in with account : <span id="accountAddress"></span>
             </p>
             <br/>
             <form onSubmit="App.accessContracts(); return false;" role="form">
                 <div class="form-group">
                     <div class="input-group">
-                        Hashed Timelock Contract Address:
+                        <label for="input-address-token">Hashed Timelock Contract Address:</label>
                         <input type="text" id="input-address-htlc" class="form-control input-lg"
-                               name="addressHtlc" placeholder="0x0">
-                        </br>Associated ERC20 Contract Address:
-                        <input id="hashlock" class="form-control input-lg" type="number"
-                               name="hashlock" placeholder="0x0"/>
+                               name="addressHtlc" placeholder="0x0" value="0x6c3DB88E97dA81f4B7CD49f68FaC6A2430222380"/>
+                        </br>
+                        <label for="input-address-token">Associated ERC20 Contract Address:</label>
+                        <input id="input-address-token" class="form-control input-lg" type="text"
+                               name="addressToken" placeholder="0x0" value="0x3a882dc305682f10A992fbC50C8C2E03eCb7b260"/>
                         </br>
                         <span class="input-group-btn">
                             <!--implement link to success page with contract details?-->
@@ -54,8 +53,6 @@
                 <span id="token-totalSupply"></span>
             </p>
             <hr>
-            <p id="accountAddress"></p>
-            <p id="tokenContractAddress"></p>
         </div>
     </div>
 </div>

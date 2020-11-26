@@ -16,3 +16,7 @@
 #startpage {
     display: none;
 }
+
+#accountAddress {
+    font-weight: bold;
+}
