@@ -79,6 +79,7 @@ App = {
         });
     },
 
+    //FIXME: show correct balance
     testContracts: function () {
         console.log("testContracts was executed");
         var input_address_token = $('#input-address-token').val();
