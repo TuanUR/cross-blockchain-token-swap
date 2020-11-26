@@ -37,7 +37,7 @@ App = {
         return App.renderStartpage();
     },
 
-    testSubmit: function() {
+    testSubmit: function () {
         console.log("form was correctly sent and function executed");
     },
 
@@ -70,30 +70,34 @@ App = {
                 App.contracts.TokenSwapCoin.setProvider(App.web3Provider);
                 var input_address_token = $('#input-address-token').val();
                 // current token address: 0x3a882dc305682f10A992fbC50C8C2E03eCb7b260
-                App.contracts.TokenSwapCoin.at(input_address_token).then(function (TokenSwapCoin) {
+                App.contracts.TokenSwapCoin.at("0x3f543AAC9B7b905A12b8a827DDD0F7898b279387").then(function (TokenSwapCoin) {
                     console.log("Token address: ", TokenSwapCoin.address);
-                });
+                    return TokenSwapCoin.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
+                })
                 //  return App.render();
                 return App.renderHomepage();
             })
         });
     },
 
-    //FIXME: show correct balance
+
     testContracts: function () {
         console.log("testContracts was executed");
         var input_address_token = $('#input-address-token').val();
-        App.contracts.TokenSwapCoin.at(input_address_token).then(function (TokenSwapCoin) {
+        App.contracts.TokenSwapCoin.at("0x3f543AAC9B7b905A12b8a827DDD0F7898b279387").then(function (instance) {
+            TokenSwapCoinInstance = instance;
             var user_account = $('#accountAddress').val();
-            return TokenSwapCoin.balanceOf("0x31281336c2e70E1D816b0be3f7b036Dbd14308d8");
+            return TokenSwapCoinInstance.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
+        }).then(function (balance) {
+            console.log(balance.toNumber());
+            return TokenSwapCoinInstance.balanceOf("0x31281336c2e70E1D816b0be3f7b036Dbd14308d8");
         }).then(function (balance) {
             console.log(balance.toNumber());
         })
-
     },
 
     // render the startpage, where the user enters the contract addresses he deployed on the blockchain
-    renderStartpage: function() {
+    renderStartpage: function () {
         var startpage = $('#startpage');
         var homepage = $('#content')
         startpage.show();
@@ -111,7 +115,7 @@ App = {
         })
     },
 
-    renderHomepage: function() {
+    renderHomepage: function () {
         var startpage = $('#startpage');
         var homepage = $('#content')
         startpage.hide();
