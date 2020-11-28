@@ -16,13 +16,13 @@
             <br/>
             <div class="introduction text-center">
                 <p class="welcome">Welcome to the Hash Timelocked Cross-Chain Token-Swap (HTLC)</p>
-                <p>Enter details below to proceed to the swap functions</p>
                 <p>You are signed in with account : <span id="accountAddress"></span>
                 </p>
             </div>
             <br/>
         </div>
         <div id="startpage" class="text-center">
+            <p>Enter details below to proceed to the swap functions</p>
             <form onSubmit="App.accessContracts(); return false;" role="form">
                 <div class="form-group">
                     <div class="input-group">
@@ -59,23 +59,27 @@
             </div>
             <div class="contract-actions">
                 <div id="claim">
-                    <h2>Enter details and hit "Claim" to claim your funds</h2>
-                    <label for="claim-contractId">Contract Id:</label>
-                    <input type="text" id="claim-contractId" class="form-control input-lg"
-                           value="0xf8c771506fbe43c46b92f1edd324e1717d9fa553e4df41b0c73a241e9e484877"/>
-                    </br>
-                    <label for="secret-claim">Secret:</label>
-                    <input id="secret-claim" class="form-control input-lg" type="text"/>
-                    </br>
-                    <button onclick="App.claim(); return false;" class="btn btn-success btn-lg">Claim</button>
+                    <form onSubmit="App.claim(); return false;" role="form">
+                        <h2>Enter details and hit "Claim" to claim your funds</h2>
+                        <label for="claim-contractId">Contract Id:</label>
+                        <input type="text" id="claim-contractId" class="form-control input-lg"
+                               value="0xf8c771506fbe43c46b92f1edd324e1717d9fa553e4df41b0c73a241e9e484877"/>
+                        </br>
+                        <label for="secret-claim">Secret:</label>
+                        <input id="secret-claim" class="form-control input-lg" type="text"/>
+                        </br>
+                        <button type="submit" class="btn btn-success btn-lg">Claim</button>
+                    </form>
                 </div>
                 <div id="refund">
-                    <h2>Enter details and hit "Refund" to refund your funds</h2>
-                    <label for="refund-contractId">Contract Id:</label>
-                    <input type="text" id="refund-contractId" class="form-control input-lg"
-                           value="0xf8c771506fbe43c46b92f1edd324e1717d9fa553e4df41b0c73a241e9e484877"/>
-                    </br>
-                    <button class="btn btn-success btn-lg">Refund</button>
+                    <form onSubmit="App.refund(); return false;" role="form">
+                        <h2>Enter details and hit "Refund" to refund your funds</h2>
+                        <label for="refund-contractId">Contract Id:</label>
+                        <input type="text" id="refund-contractId" class="form-control input-lg"
+                               value="0xf8c771506fbe43c46b92f1edd324e1717d9fa553e4df41b0c73a241e9e484877"/>
+                        </br>
+                        <button type="submit" class="btn btn-success btn-lg">Refund</button>
+                    </form>
                 </div>
 
                 <p>Total Supply on the Network [

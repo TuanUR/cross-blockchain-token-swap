@@ -121,6 +121,10 @@ App = {
         console.log("Executed claim function");
     },
 
+    refund: function() {
+        console.log("Executed refund function");
+    },
+
     // acts as function that renders the entire app
     render: function () {
         if (App.loading) {
