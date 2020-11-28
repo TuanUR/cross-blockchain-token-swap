@@ -14,13 +14,15 @@
         <div class="col-lg-12">
             <h1 class="text-center">Cross Chain Token Swap</h1>
             <br/>
+            <div class="introduction text-center">
+                <p class="welcome">Welcome to the Hash Timelocked Cross-Chain Token-Swap (HTLC)</p>
+                <p>Enter details below to proceed to the swap functions</p>
+                <p>You are signed in with account : <span id="accountAddress"></span>
+                </p>
+            </div>
+            <br/>
         </div>
         <div id="startpage" class="text-center">
-            <p class="introduction">Welcome to the Hash Timelocked Cross-Chain Token-Swap (HTLC)</p>
-            <p>Enter details below to proceed to the swap functions</p>
-            <p>You are signed in with account : <span id="accountAddress"></span>
-            </p>
-            <br/>
             <form onSubmit="App.accessContracts(); return false;" role="form">
                 <div class="form-group">
                     <div class="input-group">
@@ -65,7 +67,7 @@
                     <label for="secret-claim">Secret:</label>
                     <input id="secret-claim" class="form-control input-lg" type="text"/>
                     </br>
-                    <button class="btn btn-success btn-lg">Claim</button>
+                    <button onclick="App.claim(); return false;" class="btn btn-success btn-lg">Claim</button>
                 </div>
                 <div id="refund">
                     <h2>Enter details and hit "Refund" to refund your funds</h2>

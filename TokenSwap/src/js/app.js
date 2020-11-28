@@ -114,8 +114,11 @@ App = {
         homepage.show();
         var contractId = $("#input-contractId").val();
         $("#contractId-info").html(contractId);
-        console.log("ContractId", contractId);
         return App.testContracts();
+    },
+
+    claim: function() {
+        console.log("Executed claim function");
     },
 
     // acts as function that renders the entire app
