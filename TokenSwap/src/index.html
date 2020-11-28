@@ -30,7 +30,12 @@
                         </br>
                         <label for="input-address-token">Associated ERC20 Contract Address:</label>
                         <input id="input-address-token" class="form-control input-lg" type="text"
-                               name="addressToken" placeholder="0x0" value="0x3f543AAC9B7b905A12b8a827DDD0F7898b279387"/>
+                               name="addressToken" placeholder="0x0"
+                               value="0x3f543AAC9B7b905A12b8a827DDD0F7898b279387"/>
+                        </br>
+                        <label for="input-contractId">Associated ContractId (emitted by setSwap() ):</label>
+                        <input id="input-contractId" class="form-control input-lg" type="text" placeholder="0x0"
+                               value="0x3f543AAC9B7b905A12b8a827DDD0F7898b279387"/>
                         </br>
                         <span class="input-group-btn">
                             <!--implement link to success page with contract details?-->
@@ -40,30 +45,38 @@
                 </div>
             </form>
         </div>
-        <div id="homepage" class="text-center" style="">
+        <div id="content" class="text-center" style="display: none;">
             <!--progress bar to show how much time of timelock has passed?-->
             <div class="progress">
                 <div id="progress" class="progress-bar progress-bar-striped-active"
                      aria-valuemin="0" aria-valuemax="100">
                 </div>
             </div>
-            <div>
+            <div class="contract-actions">
                 <div id="claim">
                     <h2>Enter details and hit "Claim" to claim your funds</h2>
-                    <label for="claim-contract-id">Contract Id:</label>
-                    <input type="text" id="claim-contract-id" class="form-control input-lg"/>
+                    <label for="claim-contractId">Contract Id:</label>
+                    <input type="text" id="claim-contractId" class="form-control input-lg"/>
                     </br>
                     <label for="secret-claim">Secret:</label>
                     <input id="secret-claim" class="form-control input-lg" type="text"/>
                     </br>
                     <button class="btn btn-success btn-lg">Claim</button>
                 </div>
+                <div id="refund">
+                    <h2>Enter details and hit "Refund" to refund your funds</h2>
+                    <label for="refund-contractId">Contract Id:</label>
+                    <input type="text" id="refund-contractId" class="form-control input-lg"/>
+                    </br>
+                    <button class="btn btn-success btn-lg">Refund</button>
+                </div>
+
+                <p>Total Supply on the Network [
+                    <span class="token-symbol"></span> Token ] :
+                    <span id="token-totalSupply"></span>
+                </p>
+                <hr>
             </div>
-            <p>Total Supply on the Network [
-                <span class="token-symbol"></span> Token ] :
-                <span id="token-totalSupply"></span>
-            </p>
-            <hr>
         </div>
     </div>
 </div>

@@ -93,7 +93,7 @@ App = {
     // render the startpage, where the user enters the contract addresses he deployed on the blockchain
     renderStartpage: function () {
         var startpage = $('#startpage');
-        var homepage = $('#homepage');
+        var homepage = $('#content');
         startpage.show();
         homepage.hide();
 
@@ -111,7 +111,7 @@ App = {
 
     renderHomepage: function () {
         var startpage = $('#startpage');
-        var homepage = $('#homepage');
+        var homepage = $('#content');
         startpage.hide();
         homepage.show();
         return App.testContracts();
