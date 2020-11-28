@@ -50,11 +50,8 @@ App = {
             // set the web3 provider for the contract
             App.contracts.HashedTimelockERC20.setProvider(App.web3Provider);
 
-            //FIXME get input contract address from user
             console.log("accessContracts was executed");
             var input_address_htlc = $('#input-address-htlc').val();
-            // deployment for testing
-            // current htlc address: 0x6c3DB88E97dA81f4B7CD49f68FaC6A2430222380
             App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
                 console.log("HashedTimelock contract address: ", HashedTimelockERC20.address);
             });
@@ -110,10 +107,14 @@ App = {
     },
 
     renderHomepage: function () {
+        console.log("Render homepage was executed");
         var startpage = $('#startpage');
         var homepage = $('#content');
         startpage.hide();
         homepage.show();
+        var contractId = $("#input-contractId").val();
+        $("#contractId-info").html(contractId);
+        console.log("ContractId", contractId);
         return App.testContracts();
     },
 
