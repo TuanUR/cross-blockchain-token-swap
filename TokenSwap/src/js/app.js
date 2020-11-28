@@ -117,11 +117,29 @@ App = {
         return App.testContracts();
     },
 
-    claim: function() {
+    //FIXME: metadata for calling claim function
+    claim: function () {
         console.log("Executed claim function");
+        const contractId = $("#input-contractId").val();
+        const secret = web3.fromAscii(($("#secret-claim").val()));
+        var input_address_htlc = $('#input-address-htlc').val();
+        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
+            return HashedTimelockERC20.claim(contractId, secret, {
+                from: App.account,
+                value: 0,
+                gas: 50000
+            });
+        }).then(function (err, result) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log("Claim was successful!");
+                $("form").trigger("reset");
+            }
+        });
     },
 
-    refund: function() {
+    refund: function () {
         console.log("Executed refund function");
     },
 
