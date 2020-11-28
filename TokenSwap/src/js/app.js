@@ -37,10 +37,6 @@ App = {
         return App.renderStartpage();
     },
 
-    testSubmit: function() {
-        console.log("form was correctly sent and function executed");
-    },
-
     // instantiate smart contract so web3 knows where to find it and
     // how it works => enables interacting with Ethereum via web3
     //FIXME
@@ -54,12 +50,8 @@ App = {
             // set the web3 provider for the contract
             App.contracts.HashedTimelockERC20.setProvider(App.web3Provider);
 
-            //FIXME get input contract address from user
             console.log("accessContracts was executed");
             var input_address_htlc = $('#input-address-htlc').val();
-            //console.log('"' + input_address + '"');
-            // deployment for testing
-            // current htlc address: 0x6c3DB88E97dA81f4B7CD49f68FaC6A2430222380
             App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
                 console.log("HashedTimelock contract address: ", HashedTimelockERC20.address);
             });
@@ -69,37 +61,40 @@ App = {
                 App.contracts.TokenSwapCoin = TruffleContract(TokenSwapCoinArtifact);
                 App.contracts.TokenSwapCoin.setProvider(App.web3Provider);
                 var input_address_token = $('#input-address-token').val();
-                // current token address: 0x3a882dc305682f10A992fbC50C8C2E03eCb7b260
                 App.contracts.TokenSwapCoin.at(input_address_token).then(function (TokenSwapCoin) {
                     console.log("Token address: ", TokenSwapCoin.address);
-                });
+                    return TokenSwapCoin.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
+                })
                 //  return App.render();
                 return App.renderHomepage();
             })
         });
     },
 
-    //FIXME: show correct balance
+
     testContracts: function () {
         console.log("testContracts was executed");
         var input_address_token = $('#input-address-token').val();
-        App.contracts.TokenSwapCoin.at(input_address_token).then(function (TokenSwapCoin) {
+        App.contracts.TokenSwapCoin.at("0x3f543AAC9B7b905A12b8a827DDD0F7898b279387").then(function (instance) {
+            TokenSwapCoinInstance = instance;
             var user_account = $('#accountAddress').val();
-            return TokenSwapCoin.balanceOf("0x31281336c2e70E1D816b0be3f7b036Dbd14308d8");
+            return TokenSwapCoinInstance.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
+        }).then(function (balance) {
+            console.log(balance.toNumber());
+            return TokenSwapCoinInstance.balanceOf("0x31281336c2e70E1D816b0be3f7b036Dbd14308d8");
         }).then(function (balance) {
             console.log(balance.toNumber());
         })
-
     },
 
     // render the startpage, where the user enters the contract addresses he deployed on the blockchain
-    renderStartpage: function() {
+    renderStartpage: function () {
         var startpage = $('#startpage');
-        var homepage = $('#content')
+        var homepage = $('#content');
         startpage.show();
         homepage.hide();
 
-        // Load account data (account that is currently used e.g. on MetaMask)
+        // Load account data and display on startpage (account that is currently used e.g. on MetaMask)
         web3.eth.getAccounts(function (err, account) {
             if (err) {
                 console.log(err);
@@ -111,11 +106,15 @@ App = {
         })
     },
 
-    renderHomepage: function() {
+    renderHomepage: function () {
+        console.log("Render homepage was executed");
         var startpage = $('#startpage');
-        var homepage = $('#content')
+        var homepage = $('#content');
         startpage.hide();
         homepage.show();
+        var contractId = $("#input-contractId").val();
+        $("#contractId-info").html(contractId);
+        console.log("ContractId", contractId);
         return App.testContracts();
     },
 
