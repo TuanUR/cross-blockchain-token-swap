@@ -24,13 +24,13 @@
             <form onSubmit="App.accessContracts(); return false;" role="form">
                 <div class="form-group">
                     <div class="input-group">
-                        <label for="input-address-token">Hashed Timelock Contract Address:</label>
+                        <label for="input-address-htlc">Hashed Timelock Contract Address:</label>
                         <input type="text" id="input-address-htlc" class="form-control input-lg"
                                name="addressHtlc" placeholder="0x0" value="0x6c3DB88E97dA81f4B7CD49f68FaC6A2430222380"/>
                         </br>
                         <label for="input-address-token">Associated ERC20 Contract Address:</label>
                         <input id="input-address-token" class="form-control input-lg" type="text"
-                               name="addressToken" placeholder="0x0" value="0x3a882dc305682f10A992fbC50C8C2E03eCb7b260"/>
+                               name="addressToken" placeholder="0x0" value="0x3f543AAC9B7b905A12b8a827DDD0F7898b279387"/>
                         </br>
                         <span class="input-group-btn">
                             <!--implement link to success page with contract details?-->
@@ -40,12 +40,23 @@
                 </div>
             </form>
         </div>
-        <div id="content" class="text-center" style="display: none;">
-
+        <div id="homepage" class="text-center" style="">
             <!--progress bar to show how much time of timelock has passed?-->
             <div class="progress">
                 <div id="progress" class="progress-bar progress-bar-striped-active"
                      aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+            <div>
+                <div id="claim">
+                    <h2>Enter details and hit "Claim" to claim your funds</h2>
+                    <label for="claim-contract-id">Contract Id:</label>
+                    <input type="text" id="claim-contract-id" class="form-control input-lg"/>
+                    </br>
+                    <label for="secret-claim">Secret:</label>
+                    <input id="secret-claim" class="form-control input-lg" type="text"/>
+                    </br>
+                    <button class="btn btn-success btn-lg">Claim</button>
                 </div>
             </div>
             <p>Total Supply on the Network [
