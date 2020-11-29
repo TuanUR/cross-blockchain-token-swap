@@ -71,7 +71,7 @@ App = {
         });
     },
 
-
+    // for development only - might delete now
     testContracts: function () {
         console.log("testContracts was executed");
         var input_address_token = $('#input-address-token').val();
@@ -114,7 +114,7 @@ App = {
         homepage.show();
         var contractId = $("#input-contractId").val();
         $("#contractId-info").html(contractId);
-        return App.testContracts();
+        //return App.timelockProgress();
     },
 
     //FIXME: secret in bytes32 doesn't match hashlock
@@ -160,50 +160,16 @@ App = {
         });
     },
 
-    // acts as function that renders the entire app
-    render: function () {
-        if (App.loading) {
-            return;
-        }
-        App.loading = true;
-
-        var loader = $('#loader');
-        var content = $('#content');
-
-        loader.show();
-        content.hide();
-
-
-        /*
-        // display total token supply on the whole network
-        App.contracts.TokenSwapCoin.deployed().then(function (instance) {
-            TokenSwapCoinInstance = instance;
-            return TokenSwapCoinInstance.totalSupply();
-        }).then(function (totalSupply) {
-            App.totalSupply = totalSupply;
-            $('#token-totalSupply').html(App.totalSupply.toNumber());
-            return TokenSwapCoinInstance.address;
-        }).then(function (tokenContractAddress) {
-            App.tokenContractAddress = tokenContractAddress;
-            $('#tokenContractAddress').html("Token Contract Address on the Network (Token): " +
-                App.tokenContractAddress);
-            return TokenSwapCoinInstance.symbol();
-        }).then(function (symbol) {
-            //$('#token-balance').html("You currently have " + balance.toNumber() + " Token");
-            $('.token-symbol').html(symbol);
-            return TokenSwapCoinInstance.balanceOf(App.account);
+    // shows the timelock in percent in the progress bar on the homepage
+    //FIXME: fires metamask transaction, that has to be confirmed specifically
+    timelockProgress: function () {
+        const contractId = $("#input-contractId").val();
+        const input_address_htlc = $('#input-address-htlc').val();
+        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (instance) {
+            return instance.getContract(contractId);
+        }).then(function(result){
+            console.log(result);
         })
-            .then(function (balance) {
-                //$('#token-balance').html("You currently have " + balance.toNumber() + " Token");
-                $('#token-balance').html(balance.toNumber());
-                console.log(balance.toNumber());
-            })
-        // show everything
-        App.loading = false;
-        loader.hide();
-        content.show();
-
-         */
     }
 }
 
