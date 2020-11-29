@@ -4,7 +4,7 @@ App = {
     contracts: {},
     account: '0x0',
     loading: false,
-    tokenPrice: 0,
+    tokenPrice: 0, //not needed?
 
 
     // init app
@@ -117,16 +117,18 @@ App = {
         return App.testContracts();
     },
 
-    //FIXME: metadata for calling claim function
+    //FIXME: find out needed metadata for calling claim function
     claim: function () {
         console.log("Executed claim function");
         const contractId = $("#input-contractId").val();
-        const secret = web3.fromAscii(($("#secret-claim").val()));
+        //const secret = web3.fromAscii(($("#secret-claim").val())); string to bytes32 convert function
+        const secret = $("#secret-claim").val();
+        console.log(secret);
         var input_address_htlc = $('#input-address-htlc').val();
-        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
+        App.contracts.HashedTimelockERC20.at("0x82FfC531DC72C22D39B00B6fb17BfD0a38b774c7").then(function (HashedTimelockERC20) {
             return HashedTimelockERC20.claim(contractId, secret, {
-                from: App.account,
-                value: 0,
+                from: "0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5",
+                //timestamp: Date.now(), //FIXME
                 gas: 50000
             });
         }).then(function (err, result) {
@@ -141,6 +143,21 @@ App = {
 
     refund: function () {
         console.log("Executed refund function");
+        const contractId = $("#input-contractId").val();
+        console.log(contractId);
+        App.contracts.HashedTimelockERC20.at("0x82FfC531DC72C22D39B00B6fb17BfD0a38b774c7").then(function (instance) {
+            return instance.refund("0x6da11dbbfe6c575841da0bf2f0542326130f296538548ab5c592dda2fe133d42", {
+                from: "0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5",
+                gas: 500000
+            });
+        }).then(function(err, result) {
+            if (err) {
+                console.log(err)
+            } else {
+                alert("refund was successful!");
+                $("form").trigger("reset");
+            }
+        });
     },
 
     // acts as function that renders the entire app
