@@ -95,7 +95,7 @@ App = {
         homepage.hide();
 
         // Load account data and display on startpage (account that is currently used e.g. on MetaMask)
-        web3.eth.getAccounts(function (err, account) {
+        web3.eth.getCoinbase(function (err, account) {
             if (err) {
                 console.log(err);
             } else {
@@ -117,7 +117,7 @@ App = {
         return App.testContracts();
     },
 
-    //FIXME: find out needed metadata for calling claim function
+    //FIXME: secret in bytes32 doesn't match hashlock
     claim: function () {
         console.log("Executed claim function");
         const contractId = $("#input-contractId").val();
@@ -125,11 +125,10 @@ App = {
         const secret = $("#secret-claim").val();
         console.log(secret);
         var input_address_htlc = $('#input-address-htlc').val();
-        App.contracts.HashedTimelockERC20.at("0x82FfC531DC72C22D39B00B6fb17BfD0a38b774c7").then(function (HashedTimelockERC20) {
+        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
             return HashedTimelockERC20.claim(contractId, secret, {
-                from: "0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5",
-                //timestamp: Date.now(), //FIXME
-                gas: 50000
+                from: App.account,
+                gas: 500000 // gas limit
             });
         }).then(function (err, result) {
             if (err) {
@@ -144,10 +143,11 @@ App = {
     refund: function () {
         console.log("Executed refund function");
         const contractId = $("#input-contractId").val();
+        const input_address_htlc = $('#input-address-htlc').val();
         console.log(contractId);
-        App.contracts.HashedTimelockERC20.at("0x82FfC531DC72C22D39B00B6fb17BfD0a38b774c7").then(function (instance) {
-            return instance.refund("0x6da11dbbfe6c575841da0bf2f0542326130f296538548ab5c592dda2fe133d42", {
-                from: "0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5",
+        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (instance) {
+            return instance.refund(contractId, {
+                from: App.account,
                 gas: 500000
             });
         }).then(function(err, result) {
