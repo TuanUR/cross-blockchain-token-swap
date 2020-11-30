@@ -114,7 +114,9 @@ App = {
         homepage.show();
         var contractId = $("#input-contractId").val();
         $("#contractId-info").html(contractId);
+        $("#refund-contractId").html(contractId);
         //return App.timelockProgress();
+        return App.testContracts();
     },
 
     //FIXME: secret in bytes32 doesn't match hashlock
