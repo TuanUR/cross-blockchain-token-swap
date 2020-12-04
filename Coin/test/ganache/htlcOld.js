@@ -1,4 +1,4 @@
-const HashedTimelockERC20 = artifacts.require("HashedTimelockERC20");
+/*const HashedTimelockERC20 = artifacts.require("HashedTimelockERC20");
 const Coin = artifacts.require("Coin");
 
 contract("HashedTimelockERC20", accounts => {
@@ -9,7 +9,7 @@ contract("HashedTimelockERC20", accounts => {
     const hashlock = "0x29d47406ac390709745e2da337abc011314b11d53e0a012d9d94590d722c4dee";
     const secretKey = "Cross-Blockchain Token Swap mit Ethereum";
 
-    const FAILED_MSG = 'Returned error: VM Exception while processing transaction: ';
+    const FAILED_MSG = 'Returned error: VM Exception while processing transaction: revert';
 
     let htlc;
     let coin;
@@ -226,4 +226,4 @@ contract("HashedTimelockERC20", accounts => {
         }
     })
 
-})
+})*/

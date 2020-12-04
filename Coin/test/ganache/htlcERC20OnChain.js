@@ -1,4 +1,4 @@
-const HashedTimelockERC20 = artifacts.require("HashedTimelockERC20.sol")
+/*const HashedTimelockERC20 = artifacts.require("HashedTimelockERC20.sol")
 const AnnaERC20Token = artifacts.require("tokens/AnnaERC20.sol")
 const BenERC20Token = artifacts.require("tokens/BenERC20.sol")
 
@@ -6,7 +6,6 @@ contract("HashedTimelock swap between two ERC20 tokens", accounts => {
     const Anna = accounts[1]
     const Ben = accounts[2]
 
-    const initialSupply = 1000
     const initialBalance = 100
     const tokenAmount = 10
 
@@ -22,13 +21,13 @@ contract("HashedTimelock swap between two ERC20 tokens", accounts => {
     let benContractId
 
     before(async () => {
-        htlc = await HashedTimelockERC20.new()
-        AnnaERC20 = await AnnaERC20Token.new(initialSupply)
-        BenERC20 = await BenERC20Token.new(initialSupply)
+        htlc = await HashedTimelockERC20.deployed()
+        AnnaERC20 = await AnnaERC20Token.new()
+        BenERC20 = await BenERC20Token.new()
 
         await AnnaERC20.transfer(Anna, initialBalance)
         await BenERC20.transfer(Ben, initialBalance)
-
+        
         assert.equal(await AnnaERC20.balanceOf(Anna), initialBalance)
         assert.equal(await BenERC20.balanceOf(Anna), 0)
         assert.equal(await BenERC20.balanceOf(Ben), initialBalance)
@@ -105,13 +104,18 @@ contract("HashedTimelock swap between two ERC20 tokens", accounts => {
             assert.equal(await AnnaERC20.balanceOf(htlc.address), tokenAmount)
             assert.equal(await BenERC20.balanceOf(htlc.address), tokenAmount)
 
-            setTimeout(async () => {
-                await htlc.refund(annaContractId, {from: Anna})
-                assert.equal(await htlc.balanceOf(Anna), currentBalance)
+            return new Promise((resolve, reject) => setTimeout(async () => {
+                try{
+                    await htlc.refund(annaContractId, {from: Anna})
+                    assert.equal(await AnnaERC20.balanceOf(Anna), currentBalance)
 
-                await htlc.refund(benContractId, {from: Ben})
-                assert.equal(await htlc.balanceOf(Ben), currentBalance)
-            }, 5 * 1000)
+                    await htlc.refund(benContractId, {from: Ben})
+                    assert.equal(await BenERC20.balanceOf(Ben), currentBalance)
+                    resolve()
+                } catch(error) {
+                    reject(error)
+                }
+            }, 5 * 1000))
         })
     })
-})
+})*/
