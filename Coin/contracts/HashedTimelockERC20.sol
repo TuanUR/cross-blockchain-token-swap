@@ -59,12 +59,6 @@ contract HashedTimelockERC20 {
             revert("transferFrom sender to this failed");
         }
 
-        /*
-        if(!ERC20(_tokenContract).transfer(address(this), _tokenAmount), {from: msg.sender}) {
-            revert("transfer to this failed");
-        }
-        */
-
         contracts[contractId] = HTLC(
             msg.sender, 
             _receiver,

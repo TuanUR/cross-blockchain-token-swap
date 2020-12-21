@@ -8,434 +8,562 @@ if(fs.existsSync('secret.json')) {
 
 const Web3 = require("web3")
 const providerGoerli = new Web3.providers.HttpProvider('https://goerli.infura.io/v3/' + secrets.infuraApiKey)
-const providerRopsten = new Web3.providers.HttpProvider('https://ropsten.infura.io/v3/' + secrets.infuraApiKey)
+const providerRinkeby = new Web3.providers.HttpProvider('https://rinkeby.infura.io/v3/' + secrets.infuraApiKey)
 
-const HashedTimelockERC20 = artifacts.require("HashedTimelockERC20")
 const AnnaERC20Token = artifacts.require("AnnaERC20")
 const BenERC20Token = artifacts.require("BenERC20")
+const HashedTimelockERC20 = artifacts.require("HashedTimelockERC20")
 
-const tokenAmount = 5
-const hashlock = "0x29d47406ac390709745e2da337abc011314b11d53e0a012d9d94590d722c4dee"
-const secretKey = "Cross-Blockchain Token Swap mit Ethereum"
-let publicSecret
+const Tx = require('ethereumjs-tx').Transaction
 
-let htlcGoerli
-let htlcRopsten
-let AnnaERC20
-let BenERC20
+const privateKeyBen = Buffer.from(secrets.privateKeyBen, 'hex')
+const privateKeyAnna = Buffer.from(secrets.privateKeyAnna, 'hex')
 
-let walletAnna
-let walletBen
+const annaAbi = JSON.parse(fs.readFileSync('./build/contracts/AnnaERC20.json', 'utf8'))
+const benAbi = JSON.parse(fs.readFileSync('./build/contracts/BenERC20.json', 'utf8'))
+const htlcAbi = JSON.parse(fs.readFileSync('./build/contracts/HashedTimelockERC20.json', 'utf8'))
 
-let annaContractId
-let benContractId
+const promisify = require('util').promisify
+const sleep = promisify(require('timers').setTimeout)
 
-let privateKeyAnna
-let privateKeyBen
+contract("Test for Cross Chain Swap", () => {
+    let Anna
+    let Ben
 
-var Tx = require('ethereumjs-tx')
+    let htlcGoerli
+    let htlcRinkeby
+    let AnnaERC20
+    let BenERC20
 
-//const abiAnnaERC20 = JSON.parse(fs.readFileSync('./build/contracts/AnnaERC20.json', 'utf8'))
-//const abiBenERC20 = JSON.parse(fs.readFileSync('./build/contracts/BenERCC20.json', 'utf8'))
-const abiHTLC = [
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "bytes32",
-          "name": "contractId",
-          "type": "bytes32"
-        },
-        {
-          "indexed": false,
-          "internalType": "string",
-          "name": "secretKey",
-          "type": "string"
-        }
-      ],
-      "name": "claimedSwap",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "bytes32",
-          "name": "contractId",
-          "type": "bytes32"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "sender",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "receiver",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "tokenContract",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "tokenAmount",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "bytes32",
-          "name": "hashlock",
-          "type": "bytes32"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "timelock",
-          "type": "uint256"
-        }
-      ],
-      "name": "newSwap",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "bytes32",
-          "name": "contractId",
-          "type": "bytes32"
-        }
-      ],
-      "name": "refundedSwap",
-      "type": "event"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_receiver",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_tokenContract",
-          "type": "address"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "_hashlock",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_timelock",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_tokenAmount",
-          "type": "uint256"
-        }
-      ],
-      "name": "setSwap",
-      "outputs": [
-        {
-          "internalType": "bytes32",
-          "name": "contractId",
-          "type": "bytes32"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "_contractId",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "string",
-          "name": "_secretKey",
-          "type": "string"
-        }
-      ],
-      "name": "claim",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "_contractId",
-          "type": "bytes32"
-        }
-      ],
-      "name": "refund",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "_contractId",
-          "type": "bytes32"
-        }
-      ],
-      "name": "getContract",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "sender",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "receiver",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "tokenContract",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "tokenAmount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "hashlock",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "string",
-          "name": "secretKey",
-          "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "timelock",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool",
-          "name": "claimed",
-          "type": "bool"
-        },
-        {
-          "internalType": "bool",
-          "name": "refunded",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true
-    }
-  ]
+    let annaBalanceGoerli
+    let annaBalanceRinkeby
+    let benBalanceGoerli
+    let benBalanceRinkeby
+    let htlcBalanceGoerli
+    let htlcBalanceRinkeby
 
-contract("Hashed Timelock Contract Cross Chain Swap with ERC20 Tokens", async () => {
+    const tokenAmount = 5
+    const hashlock = "0x29d47406ac390709745e2da337abc011314b11d53e0a012d9d94590d722c4dee"
+    const secretKey = "Cross-Blockchain Token Swap mit Ethereum"
+    let publicSecret
+
+    let annaContractId
+    let benContractId
+
+    let annaERC20Contract
+    let benERC20Contract
+    let goerliContract
+    let rinkebyContract
 
     before(async () => {
-        //walletAnna = await web3.eth.accounts.privateKeyToAccount("0x" + secrets.privateKeyAnna)
-        //walletBen = await web3.eth.accounts.privateKeyToAccount("0x" + secrets.privateKeyBen)
-        const accounts = await web3.eth.getAccounts()
-        walletAnna = accounts[0]
-        walletBen = accounts[1]
+        const acc = await web3.eth.getAccounts()
+        Anna = acc[0]
+        Ben = acc[1]
 
-        htlcGoerli = await HashedTimelockERC20.at("0x07e6aA84d916D08073c87357B76acF141296cD17")
-        assert.equal(htlcGoerli.address, "0x07e6aA84d916D08073c87357B76acF141296cD17")
-
-        //AnnaERC20 = await AnnaERC20Token.at("0xD9877983E1BbC6911578AB92eCeC3E5d37F3abb8")
-        //assert.equal(AnnaERC20.address, "0xD9877983E1BbC6911578AB92eCeC3E5d37F3abb8")
+        await AnnaERC20Token.setProvider(providerGoerli)
         AnnaERC20 = await AnnaERC20Token.deployed()
 
-        await HashedTimelockERC20.setProvider(providerRopsten)
-        htlcRopsten = await HashedTimelockERC20.at("0x4a73008E1354bc91EdE5E5348750F567F4A1Be06")
-        assert.equal(htlcRopsten.address, "0x4a73008E1354bc91EdE5E5348750F567F4A1Be06")
+        await HashedTimelockERC20.setProvider(providerGoerli) 
+        htlcGoerli = await HashedTimelockERC20.at("0x07e6aA84d916D08073c87357B76acF141296cD17")
 
-        await BenERC20Token.setProvider(providerRopsten)
+        await BenERC20Token.setProvider(providerRinkeby)
         BenERC20 = await BenERC20Token.deployed()
-        //BenERC20 = await BenERC20Token.at("0x45a99781Cb665dC8559Ae95Fc343C0994AD999fa") 
-        //assert.equal(BenERC20.address, "0x45a99781Cb665dC8559Ae95Fc343C0994AD999fa")
 
-        privateKeyAnna = Buffer.from(
-            secrets.privateKeyAnna,
-            'hex',
-          )
-        privateKeyBen = Buffer.from(
-            secrets.privateKeyBen,
-            'hex',
-          )
+        await HashedTimelockERC20.setProvider(providerRinkeby)
+        htlcRinkeby = await HashedTimelockERC20.at("0x335E601Bdd7bb5b13794B7edB1F509D1B6fE2c1d")
     })
-/*
-    it("Show acount address", async () => {
-        console.log("HTLC Goerli: " + htlcGoerli.address)
-        console.log("Anna ERC20: " + AnnaERC20.address)
 
-        console.log("Anna: " + walletAnna.address)
-        console.log("Ben: " + walletBen.address)
-
-        console.log("HTLC Ropsten: " + htlcRopsten.address)
-        console.log("Ben ERC20: " + htlcGoerli.address)
-    })*/
-
-    it("Anna initiates a swap with Ben", async () => {
+    it("initialization of web3 for Goerli", async () => {
         const web3 = new Web3(providerGoerli)
-        //await HashedTimelockERC20.setProvider(providerGoerli)
-        const timelock = (Math.floor(Date.now() / 1000)) + 3
-        await AnnaERC20.approve(htlcGoerli.address, tokenAmount, {from: walletAnna})
+        annaERC20Contract = new web3.eth.Contract(annaAbi.abi, AnnaERC20.address)
+        goerliContract = new web3.eth.Contract(htlcAbi.abi, htlcGoerli.address)
+    })
 
+    it("initialization of web3 for Rinkeby", async () => {
+        const web3 = new Web3(providerRinkeby)
+        benERC20Contract = new web3.eth.Contract(benAbi.abi, BenERC20.address)
+        rinkebyContract = new web3.eth.Contract(htlcAbi.abi, htlcRinkeby.address)
+    })
 
-        const myContract = new web3.eth.Contract(abiHTLC, htlcGoerli.address);
+    it("show balances of Anna and Ben on Goerli and Rinkeby", async () => {
+        annaBalanceGoerli = await annaERC20Contract.methods.balanceOf(Anna).call()
+        console.log("Anna goerli: " + annaBalanceGoerli)
+        benBalanceGoerli = await annaERC20Contract.methods.balanceOf(Ben).call()
+        console.log("Ben goerli: " + benBalanceGoerli)
+        htlcBalanceGoerli =  await annaERC20Contract.methods.balanceOf(htlcGoerli.address).call()
+        console.log("HTLC goerli: " + htlcBalanceGoerli)
 
-        const myData = myContract.methods.setSwap(
-            walletBen, 
-            AnnaERC20.address, 
-            hashlock, 
-            timelock, 
-            tokenAmount
-        ).send({from: walletAnna})
-/*
-        const txObject = {
-            from: walletAnna,
-            to: htlcGoerli.address,
-            gasLimit: web3.utils.toHex(2100000),
-            gasPrice: web3.utils.toHex(web3.utils.toWei('6', 'gwei')),
-            data: myData
-        }
+        benBalanceRinkeby = await benERC20Contract.methods.balanceOf(Ben).call()
+        console.log("Ben rinkeby: " + benBalanceRinkeby)
+        annaBalanceRinkeby = await benERC20Contract.methods.balanceOf(Anna).call()
+        console.log("Anna rinkeby: " + annaBalanceRinkeby)
+        htlcBalanceRinkeby = await benERC20Contract.methods.balanceOf(htlcRinkeby.address).call()
+        console.log("HTLC rinkeby: " + htlcBalanceRinkeby)
+    })
 
-        const raw = web3.eth.accounts.signTransaction(txObject, secrets.privateKeyAnna)
-        web3.eth.sendSignedTransaction(raw).on("receipt", console.log)
+    describe("Anna and Ben do a successful token swap on Goerli and Rinkeby", function () {
 
-        /*
-        web3.eth.getTransactionCount(walletAnna, (err, txCount) => {
-            // Build the transaction
-            const txObject = {
-                nonce:    web3.utils.toHex(txCount),
-                to:       htlcGoerli.address,
-                value:    web3.utils.toHex(web3.utils.toWei('0', 'ether')),
+        it("approve and setSwap() from Anna works on Goerli", async function () {
+            //this.timeout(0)
+            const web3 = new Web3(providerGoerli)
+
+            const txCountApprove = await web3.eth.getTransactionCount(Anna, "pending")
+
+            const txDataApprove = {
+                nonce: web3.utils.toHex(txCountApprove),
                 gasLimit: web3.utils.toHex(2100000),
-                gasPrice: web3.utils.toHex(web3.utils.toWei('6', 'gwei')),
-                data: myData  
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
+                to: AnnaERC20.address,
+                from: Anna,
+                data: annaERC20Contract.methods.approve(htlcGoerli.address, tokenAmount).encodeABI()
             }
-            // Sign the transaction
-            const tx = new Tx(txObject);
-            tx.sign(privateKeyAnna);
 
-            const serializedTx = tx.serialize();
-            const raw = '0x' + serializedTx.toString('hex');
+            var txApprove = new Tx(txDataApprove, {'chain':'goerli'})
+            txApprove.sign(privateKeyAnna)
+            var serializedTxApprove = txApprove.serialize()
 
-            // Send the transaction
-            web3.eth.sendSignedTransaction(raw).on("receipt", console.log)
-        });
-*/
+            await web3.eth.sendSignedTransaction("0x" + serializedTxApprove.toString("hex"))
 
-        //const firstSwap = await htlcGoerli.setSwap(walletBen, AnnaERC20.address, hashlock, timelock, tokenAmount, {from: walletAnna})
+            // send setSwap()
 
-        //annaContractId = (firstSwap.logs[0].args).contractId
+            const txCountSetSwap = await web3.eth.getTransactionCount(Anna, "pending")
 
-        //assert.equal(await AnnaERC20.balanceOf(walletAnna), 65) //initialBalance - tokenAmount)
-        assert.equal(await AnnaERC20.balanceOf(htlcGoerli.address), 5) // tokenAmount)
+            const timelock = (Math.floor(Date.now() / 1000)) + 300
+
+            const txDataSetSwap = {
+                nonce: web3.utils.toHex(txCountSetSwap),
+                gasLimit: web3.utils.toHex(2100000),
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
+                to: htlcGoerli.address,
+                from: Anna,
+                data: goerliContract.methods.setSwap(Ben, AnnaERC20.address, hashlock, timelock, tokenAmount).encodeABI()
+            }
+
+            var txSetSwap = new Tx(txDataSetSwap, {'chain':'goerli'})
+            txSetSwap.sign(privateKeyAnna)
+            var serializedTxSetSwap = txSetSwap.serialize()
+
+            await web3.eth.sendSignedTransaction("0x" + serializedTxSetSwap.toString("hex"))
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
+                }
+            })
+
+            let showEvent = undefined
+            while (showEvent === undefined) {
+                await sleep(1000)
+                showEvent = await goerliContract.getPastEvents("newSwap", { 
+                    filter: {sender: Anna, receiver: Ben}
+                })
+            }
+            console.log(showEvent[0].returnValues.contractId)
+            annaContractId = showEvent[0].returnValues.contractId
+
+            const annaBalanceNow = await annaERC20Contract.methods.balanceOf(Anna).call()
+            const benBalanceNow = await annaERC20Contract.methods.balanceOf(Ben).call()
+            const htlcBalance = await annaERC20Contract.methods.balanceOf(htlcGoerli.address).call()
+
+            assert.equal(annaBalanceNow, annaBalanceGoerli - tokenAmount)
+            assert.equal(benBalanceNow, benBalanceGoerli)
+            assert.equal(htlcBalance, htlcBalanceGoerli - (-tokenAmount))
+        })
+
+        it("approve and setSwap() from Ben works on Rinkeby", async function () {
+            //this.timeout(0)
+            const web3 = new Web3(providerRinkeby)
+
+            const txCountApprove = await web3.eth.getTransactionCount(Ben, "pending")
+
+            const txDataApprove = {
+                nonce: web3.utils.toHex(txCountApprove),
+                gasLimit: web3.utils.toHex(2100000),
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
+                to: BenERC20.address,
+                from: Ben,
+                data: benERC20Contract.methods.approve(htlcRinkeby.address, tokenAmount).encodeABI()
+            }
+
+            var txApprove = new Tx(txDataApprove, {'chain':'rinkeby'})
+            txApprove.sign(privateKeyBen)
+            var serializedTxApprove = txApprove.serialize()
+
+            await web3.eth.sendSignedTransaction("0x" + serializedTxApprove.toString("hex"))
+
+            // send setSwap()
+
+            const txCountSetSwap = await web3.eth.getTransactionCount(Ben, "pending")
+
+            const timelock = (Math.floor(Date.now() / 1000)) + 180
+
+            const txDataSetSwap = {
+                nonce: web3.utils.toHex(txCountSetSwap),
+                gasLimit: web3.utils.toHex(2100000),
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
+                to: htlcRinkeby.address,
+                from: Ben,
+                data: rinkebyContract.methods.setSwap(Anna, BenERC20.address, hashlock, timelock, tokenAmount).encodeABI()
+            }
+
+            var txSetSwap = new Tx(txDataSetSwap, {'chain':'rinkeby'})
+            txSetSwap.sign(privateKeyBen)
+            var serializedTxSetSwap = txSetSwap.serialize()
+
+            await web3.eth.sendSignedTransaction("0x" + serializedTxSetSwap.toString("hex"))
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
+                }
+            })
+
+            let showEvent = undefined
+            while (showEvent === undefined){
+                await sleep(1000)
+                showEvent = await rinkebyContract.getPastEvents("newSwap", {
+                    filter: {sender: Ben, receiver: Anna}
+                })
+            }
+            console.log(showEvent[0].returnValues.contractId)
+            benContractId = showEvent[0].returnValues.contractId
+
+            const annaBalanceNow = await benERC20Contract.methods.balanceOf(Anna).call()
+            const benBalanceNow = await benERC20Contract.methods.balanceOf(Ben).call()
+            const htlcBalance = await benERC20Contract.methods.balanceOf(htlcRinkeby.address).call()
+
+            assert.equal(annaBalanceNow, annaBalanceRinkeby)
+            assert.equal(benBalanceNow, benBalanceRinkeby - tokenAmount)
+            assert.equal(htlcBalance, htlcBalanceRinkeby - (-tokenAmount))
+        })
+
+        it("claim() Ben Tokens on Rinkeby from Anna works with secret", async () => {
+            const web3 = new Web3(providerRinkeby)
+
+            const txCount = await web3.eth.getTransactionCount(Anna, "pending")
+
+            const txData = {
+                nonce: web3.utils.toHex(txCount),
+                gasLimit: web3.utils.toHex(2100000),
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
+                to: htlcRinkeby.address,
+                from: Anna,
+                data: rinkebyContract.methods.claim(benContractId, secretKey).encodeABI()
+            }
+
+            var tx = new Tx(txData, {'chain':'rinkeby'})
+            tx.sign(privateKeyAnna)
+            var serializedTx = tx.serialize()
+
+            await web3.eth.sendSignedTransaction("0x" + serializedTx.toString("hex"))
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
+                }
+            })
+
+            const contractInstance = await rinkebyContract.methods.getContract(benContractId).call({from: Anna})
+
+            assert.equal(contractInstance.secretKey, secretKey)
+            assert.isTrue(contractInstance.claimed)
+            assert.isFalse(contractInstance.refunded)
+
+            publicSecret = contractInstance.secretKey
+
+            const annaBalanceNow = await benERC20Contract.methods.balanceOf(Anna).call()
+            const htlcBalance = await benERC20Contract.methods.balanceOf(htlcRinkeby.address).call()
+
+            assert.equal(annaBalanceNow, annaBalanceRinkeby - (-tokenAmount))
+            assert.equal(htlcBalance, htlcBalanceRinkeby)
+        })
+
+        it("claim() Anna Tokens on Goerli from Ben works with published secret ", async () => {
+            const web3 = new Web3(providerGoerli)
+
+            const txCount = await web3.eth.getTransactionCount(Ben, "pending")
+
+            const txData = {
+                nonce: web3.utils.toHex(txCount),
+                gasLimit: web3.utils.toHex(2100000),
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
+                to: htlcGoerli.address,
+                from: Ben,
+                data: goerliContract.methods.claim(annaContractId, publicSecret).encodeABI()
+            }
+
+            var tx = new Tx(txData, {'chain':'goerli'})
+            tx.sign(privateKeyBen)
+            var serializedTx = tx.serialize()
+
+            await web3.eth.sendSignedTransaction("0x" + serializedTx.toString("hex"))
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
+                }
+            })
+
+            const contractInstance = await goerliContract.methods.getContract(annaContractId).call({from: Ben})
+
+            assert.equal(contractInstance.secretKey, publicSecret)
+            assert.isTrue(contractInstance.claimed)
+            assert.isFalse(contractInstance.refunded)
+
+            const benBalanceNow = await annaERC20Contract.methods.balanceOf(Ben).call()
+            const htlcBalance = await annaERC20Contract.methods.balanceOf(htlcGoerli.address).call()
+
+            assert.equal(benBalanceNow, benBalanceGoerli - (-tokenAmount)) 
+            assert.equal(htlcBalance, htlcBalanceGoerli)
+        })
+
+        it("final balances of Anna and Ben on Goerli and Rinkeby", async () => {
+            annaBalanceGoerli = await annaERC20Contract.methods.balanceOf(Anna).call()
+            console.log("Anna goerli: " + annaBalanceGoerli)
+            benBalanceGoerli = await annaERC20Contract.methods.balanceOf(Ben).call()
+            console.log("Ben goerli: " + benBalanceGoerli)
+            htlcBalanceGoerli =  await annaERC20Contract.methods.balanceOf(htlcGoerli.address).call()
+            console.log("HTLC goerli: " + htlcBalanceGoerli)
+
+            benBalanceRinkeby = await benERC20Contract.methods.balanceOf(Ben).call()
+            console.log("Ben rinkeby: " + benBalanceRinkeby)
+            annaBalanceRinkeby = await benERC20Contract.methods.balanceOf(Anna).call()
+            console.log("Anna rinkeby: " + annaBalanceRinkeby)
+            htlcBalanceRinkeby = await benERC20Contract.methods.balanceOf(htlcRinkeby.address).call()
+            console.log("HTLC rinkeby: " + htlcBalanceRinkeby)
+        })
     })
-/*
-    it("Ben responds and set ups a swap with Anna", async () => {
-        await HashedTimelockERC20.setProvider(providerRopsten)
-        const timelock = (Math.floor(Date.now() / 1000)) + 3
-        await BenERC20.approve(htlcRopsten.address, tokenAmount, {from: walletBen})
-        const secondSwap = await htlcRopsten.setSwap(walletAnna, BenERC20.address, hashlock, timelock, tokenAmount, {from: walletBen})
 
-        benContractId = (secondSwap.logs[0].args).contractId
+/*    describe("Test if Anna and Ben get refunded", function () {
 
-        //assert.equal(await BenERC20.balanceOf(walletBen), 60) //initialBalance - tokenAmount)
-        //assert.equal(await BenERC20.balanceOf(htlcRopsten.address), 40) //tokenAmount)
-    })
-/*
-    it("Anna claims the Ben tokens with the secret", async () => {
-        await HashedTimelockERC20.setProvider(providerRopsten)
-        await htlcRopsten.claim(benContractId, secretKey, {from: walletAnna})
+        it("show balances of Anna and Ben on Goerli and Rinkeby", async () => {
+            annaBalanceGoerli = await annaERC20Contract.methods.balanceOf(Anna).call()
+            console.log("Anna goerli: " + annaBalanceGoerli)
+            benBalanceGoerli = await annaERC20Contract.methods.balanceOf(Ben).call()
+            console.log("Ben goerli: " + benBalanceGoerli)
+    
+            benBalanceRinkeby = await benERC20Contract.methods.balanceOf(Ben).call()
+            console.log("Ben rinkeby: " + benBalanceRinkeby)
+            annaBalanceRinkeby = await benERC20Contract.methods.balanceOf(Anna).call()
+            console.log("Anna rinkeby: " + annaBalanceRinkeby)
+        })
 
-        //assert.equal(await BenERC20.balanceOf(walletAnna), 10)
-        //assert.equal(await BenERC20.balanceOf(htlcRopsten.address), 5)
+        it("approve and setSwap() from Anna works on Goerli", async function () {
+            this.timeout(0)
+            const web3 = new Web3(providerGoerli)
 
-        const contractInstance = await htlcRopsten.getContract.call(benContractId);
-        assert.equal(contractInstance[5], secretKey)
-        assert.isTrue(contractInstance[7])
-        assert.isFalse(contractInstance[8])
+            const txCountApprove = await web3.eth.getTransactionCount(Anna, "pending")
 
-        publicSecret = contractInstance[5]
-    })
+            const txDataApprove = {
+                nonce: web3.utils.toHex(txCountApprove),
+                gasLimit: web3.utils.toHex(2100000),
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
+                to: AnnaERC20.address,
+                from: Anna,
+                data: annaERC20Contract.methods.approve(htlcGoerli.address, tokenAmount).encodeABI()
+            }
 
-    it("Ben claims the Anna tokens after seeing the publicly avaible secret", async () => {
-        await HashedTimelockERC20.setProvider(providerGoerli)
-        await htlcGoerli.claim(annaContractId, publicSecret, {from: walletBen})
+            var txApprove = new Tx(txDataApprove, {'chain':'goerli'})
+            txApprove.sign(privateKeyAnna)
+            var serializedTxApprove = txApprove.serialize()
 
-        //assert.equal(await AnnaERC20.balanceOf(walletBen), 10)
-        //assert.equal(await AnnaERC20.balanceOf(htlcGoerli.address), 5)
+            await web3.eth.sendSignedTransaction("0x" + serializedTxApprove.toString("hex"))
 
-        const contractInstance = await htlcGoerli.getContract.call(annaContractId)
-        assert.equal(contractInstance[5], publicSecret)
-        assert.isTrue(contractInstance[7])
-        assert.isFalse(contractInstance[8])
-    })
-*/
+            // send setSwap()
+
+            const txCountSetSwap = await web3.eth.getTransactionCount(Anna, "pending")
+
+            const timelock = (Math.floor(Date.now() / 1000)) + 20
+
+            const txDataSetSwap = {
+                nonce: web3.utils.toHex(txCountSetSwap),
+                gasLimit: web3.utils.toHex(2100000),
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
+                to: htlcGoerli.address,
+                from: Anna,
+                data: goerliContract.methods.setSwap(Ben, AnnaERC20.address, hashlock, timelock, tokenAmount).encodeABI()
+            }
+
+            var txSetSwap = new Tx(txDataSetSwap, {'chain':'goerli'})
+            txSetSwap.sign(privateKeyAnna)
+            var serializedTxSetSwap = txSetSwap.serialize()
+
+            await web3.eth.sendSignedTransaction("0x" + serializedTxSetSwap.toString("hex"))
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
+                }
+            })
+
+            let showEvent = undefined
+            while (showEvent === undefined) {
+                await sleep(1000)
+                showEvent = await goerliContract.getPastEvents("newSwap", { 
+                    filter: {sender: Anna, receiver: Ben}
+                })
+            }
+            console.log(showEvent[0].returnValues.contractId)
+            annaContractId = showEvent[0].returnValues.contractId
+        })
+
+        it("approve and setSwap() from Ben works on Rinkeby", async function () {
+            this.timeout(0)
+
+            const web3 = new Web3(providerRinkeby)
+
+            const txCountApprove = await web3.eth.getTransactionCount(Ben, "pending")
+
+            const txDataApprove = {
+                nonce: web3.utils.toHex(txCountApprove),
+                gasLimit: web3.utils.toHex(2100000),
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
+                to: BenERC20.address,
+                from: Ben,
+                data: benERC20Contract.methods.approve(htlcRinkeby.address, tokenAmount).encodeABI()
+            }
+
+            var txApprove = new Tx(txDataApprove, {'chain':'rinkeby'})
+            txApprove.sign(privateKeyBen)
+            var serializedTxApprove = txApprove.serialize()
+
+            await web3.eth.sendSignedTransaction("0x" + serializedTxApprove.toString("hex"))
+
+            // send setSwap()
+
+            const txCountSetSwap = await web3.eth.getTransactionCount(Ben, "pending")
+
+            const timelock = (Math.floor(Date.now() / 1000)) + 20
+
+            const txDataSetSwap = {
+                nonce: web3.utils.toHex(txCountSetSwap),
+                gasLimit: web3.utils.toHex(2100000),
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
+                to: htlcRinkeby.address,
+                from: Ben,
+                data: rinkebyContract.methods.setSwap(Anna, BenERC20.address, hashlock, timelock, tokenAmount).encodeABI()
+            }
+
+            var txSetSwap = new Tx(txDataSetSwap, {'chain':'rinkeby'})
+            txSetSwap.sign(privateKeyBen)
+            var serializedTxSetSwap = txSetSwap.serialize()
+
+            await web3.eth.sendSignedTransaction("0x" + serializedTxSetSwap.toString("hex"))
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
+                }
+            })
+
+            let showEvent = undefined
+            while (showEvent === undefined){
+                await sleep(1000)
+                showEvent = await rinkebyContract.getPastEvents("newSwap", {
+                    filter: {sender: Ben, receiver: Anna}
+                })
+            }
+            console.log(showEvent[0].returnValues.contractId)
+            benContractId = showEvent[0].returnValues.contractId
+        })
+
+        it("show balances of Anna and Ben on Goerli and Rinkeby", async () => {
+            annaBalanceGoerli = await annaERC20Contract.methods.balanceOf(Anna).call()
+            console.log("Anna goerli: " + annaBalanceGoerli)
+            benBalanceGoerli = await annaERC20Contract.methods.balanceOf(Ben).call()
+            console.log("Ben goerli: " + benBalanceGoerli)
+    
+            benBalanceRinkeby = await benERC20Contract.methods.balanceOf(Ben).call()
+            console.log("Ben rinkeby: " + benBalanceRinkeby)
+            annaBalanceRinkeby = await benERC20Contract.methods.balanceOf(Anna).call()
+            console.log("Anna rinkeby: " + annaBalanceRinkeby)
+        })
+
+        it("Anna does not claim, so Ben refunds", async function () {
+            this.timeout(0)
+            await sleep(20000)
+            const web3 = new Web3(providerRinkeby)
+
+            const txCount = await web3.eth.getTransactionCount(Ben, "pending")
+
+            const txData = {
+                nonce: web3.utils.toHex(txCount),
+                gasLimit: web3.utils.toHex(2100000),
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
+                to: htlcRinkeby.address,
+                from: Ben,
+                data: rinkebyContract.methods.refund(benContractId).encodeABI()
+            }
+
+            var tx = new Tx(txData, {'chain':'rinkeby'})
+            tx.sign(privateKeyBen)
+            var serializedTx = tx.serialize()
+            await web3.eth.sendSignedTransaction("0x" + serializedTx.toString("hex"))
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
+                }
+            })
+
+            const contractInstance = await rinkebyContract.methods.getContract(benContractId).call({from: Ben})
+
+            assert.isFalse(contractInstance.claimed)
+            assert.isTrue(contractInstance.refunded)
+        })
+
+        it("Anna didnt't claim and refunds", async function () {
+            this.timeout(0)
+            await sleep(20000)
+            const web3 = new Web3(providerGoerli)
+
+            const txCount = await web3.eth.getTransactionCount(Anna, "pending")
+
+            const txData = {
+                nonce: web3.utils.toHex(txCount),
+                gasLimit: web3.utils.toHex(2100000),
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
+                to: htlcGoerli.address,
+                from: Anna,
+                data: goerliContract.methods.refund(annaContractId).encodeABI()
+            }
+
+            var tx = new Tx(txData, {'chain':'goerli'})
+            tx.sign(privateKeyAnna)
+            var serializedTx = tx.serialize()
+            await web3.eth.sendSignedTransaction("0x" + serializedTx.toString("hex"))
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
+                }
+            })
+
+            const contractInstance = await goerliContract.methods.getContract(annaContractId).call({from: Anna})
+            //console.log(contractInstance)
+
+            assert.isFalse(contractInstance.claimed)
+            assert.isTrue(contractInstance.refunded)
+        })
+
+        it("final balances of Anna and Ben on Goerli and Rinkeby", async () => {
+            annaBalanceGoerli = await annaERC20Contract.methods.balanceOf(Anna).call()
+            console.log("Anna goerli: " + annaBalanceGoerli)
+            benBalanceGoerli = await annaERC20Contract.methods.balanceOf(Ben).call()
+            console.log("Ben goerli: " + benBalanceGoerli)
+    
+            benBalanceRinkeby = await benERC20Contract.methods.balanceOf(Ben).call()
+            console.log("Ben rinkeby: " + benBalanceRinkeby)
+            annaBalanceRinkeby = await benERC20Contract.methods.balanceOf(Anna).call()
+            console.log("Anna rinkeby: " + annaBalanceRinkeby)
+        })
+    })*/
 })
-
-/*
-  1) Contract: Hashed Timelock Contract Cross Chain Swap with ERC20 Tokens
-       Anna initiates a swap with Ben:
-     TypeError: e.toLowerCase is not a function
-      at Context.<anonymous> (test/testnet/htlcCrossChain.js:70:25)         approve
-      at runMicrotasks (<anonymous>)
-      at processTicksAndRejections (internal/process/task_queues.js:97:5)
-
-  2) Contract: Hashed Timelock Contract Cross Chain Swap with ERC20 Tokens
-       Ben responds and set ups a swap with Anna:
-     Error: Returned error: The method eth_sendTransaction does not exist/is not available
-      at Context.<anonymous> (test/testnet/htlcCrossChain.js:82:24)         approve
-      at runMicrotasks (<anonymous>)
-      at processTicksAndRejections (internal/process/task_queues.js:97:5)
-
-  3) Contract: Hashed Timelock Contract Cross Chain Swap with ERC20 Tokens
-       Anna claims the Ben tokens with the secret:
-     TypeError: Cannot read property 'substring' of undefined
-      at Context.<anonymous> (test/testnet/htlcCrossChain.js:93:27)         claim
-      at runMicrotasks (<anonymous>)
-      at processTicksAndRejections (internal/process/task_queues.js:97:5)
-
-  4) Contract: Hashed Timelock Contract Cross Chain Swap with ERC20 Tokens
-       Ben claims the Anna tokens after seeing the publicly avaible secret:
-     TypeError: Cannot read property 'substring' of undefined
-      at Context.<anonymous> (test/testnet/htlcCrossChain.js:108:26)        claim
-      at runMicrotasks (<anonymous>)
-      at processTicksAndRejections (internal/process/task_queues.js:97:5)
- */ 

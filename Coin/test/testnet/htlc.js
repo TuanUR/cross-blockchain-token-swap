@@ -192,7 +192,7 @@ contract("HashedTimelockERC20", accounts => {
                 } catch(error) {
                     reject(error)
                 }
-            }, 5 * 1000));
+            }, 5 * 1000))
         })
 
         it("refund() should fail before timelock expiry", async () => {

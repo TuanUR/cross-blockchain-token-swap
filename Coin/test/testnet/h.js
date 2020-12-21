@@ -1,4 +1,4 @@
-const fs = require('fs')
+/*const fs = require('fs')
 
 let secrets
 
@@ -23,6 +23,9 @@ const annaAbi = JSON.parse(fs.readFileSync('./build/contracts/AnnaERC20.json', '
 const benAbi = JSON.parse(fs.readFileSync('./build/contracts/BenERC20.json', 'utf8'))
 const htlcAbi = JSON.parse(fs.readFileSync('./build/contracts/HashedTimelockERC20.json', 'utf8'))
 
+const promisify = require('util').promisify
+const sleep = promisify(require('timers').setTimeout)
+
 contract("Test for Cross Chain Swap", () => {
     let Anna
     let Ben
@@ -36,6 +39,8 @@ contract("Test for Cross Chain Swap", () => {
     let annaBalanceRopsten
     let benBalanceGoerli
     let benBalanceRopsten
+    let htlcBalanceGoerli
+    let htlcBalanceRopsten
 
     const tokenAmount = 5
     const hashlock = "0x29d47406ac390709745e2da337abc011314b11d53e0a012d9d94590d722c4dee"
@@ -82,17 +87,21 @@ contract("Test for Cross Chain Swap", () => {
         ropstenContract = new web3.eth.Contract(htlcAbi.abi, htlcRopsten.address)
     })
 
-    /*it("show balances of Anna and Ben on Goerli and Ropsten", async () => {
+    it("show balances of Anna and Ben on Goerli and Ropsten", async () => {
         annaBalanceGoerli = await annaERC20Contract.methods.balanceOf(Anna).call()
         console.log("Anna goerli: " + annaBalanceGoerli)
         benBalanceGoerli = await annaERC20Contract.methods.balanceOf(Ben).call()
         console.log("Ben goerli: " + benBalanceGoerli)
+        htlcBalanceGoerli =  await annaERC20Contract.methods.balanceOf(htlcGoerli.address).call()
+        console.log("HTLC goerli: " + htlcBalanceGoerli)
 
         benBalanceRopsten = await benERC20Contract.methods.balanceOf(Ben).call()
         console.log("Ben ropsten: " + benBalanceRopsten)
         annaBalanceRopsten = await benERC20Contract.methods.balanceOf(Anna).call()
         console.log("Anna ropsten: " + annaBalanceRopsten)
-    })*/
+        htlcBalanceRopsten = await benERC20Contract.methods.balanceOf(htlcRopsten.address).call()
+        console.log("HTLC ropsten: " + htlcBalanceRopsten)
+    })
 
     describe("Anna and Ben do a successful token swap on Goerli and Ropsten", function () {
 
@@ -140,23 +149,25 @@ contract("Test for Cross Chain Swap", () => {
             var serializedTxSetSwap = txSetSwap.serialize()
 
             await web3.eth.sendSignedTransaction("0x" + serializedTxSetSwap.toString("hex"))
-
-
-            return new Promise((resolve, reject) => setTimeout(async () => {
-                try{
-                    // get contract id 
-                    const showEvent = await goerliContract.getPastEvents("newSwap", { 
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
+                }
+                // get contract id
+                let showEvent
+                do {
+                    showEvent = await goerliContract.getPastEvents("newSwap", { 
                         filter: {sender: Anna, receiver: Ben}
                     })
+                    await sleep(500)
+                } while (showEvent[0].event != "newSwap")
 
-                    //console.log(showEvent)
-                    console.log(showEvent[0].returnValues.contractId)
-                    annaContractId = showEvent[0].returnValues.contractId
-                    resolve()
-                } catch(error) {
-                    reject(error)
-                }
-            }, 1 * 1000))
+                //console.log(showEvent)
+                console.log(showEvent[0].returnValues.contractId)
+                annaContractId = showEvent[0].returnValues.contractId
+            })
         })
 
         it("approve and setSwap() from Ben works on Ropsten", async function () {
@@ -202,49 +213,55 @@ contract("Test for Cross Chain Swap", () => {
             var serializedTxSetSwap = txSetSwap.serialize()
 
             await web3.eth.sendSignedTransaction("0x" + serializedTxSetSwap.toString("hex"))
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
+                }
 
-            return new Promise((resolve, reject) => setTimeout(async () => {
-                try{
-                    // get contract id
-                    const showEvent = await ropstenContract.getPastEvents("newSwap", {
+                let showEvent
+                // get contract id
+                do{
+                    showEvent = await ropstenContract.getPastEvents("newSwap", {
                         filter: {sender: Ben, receiver: Anna}
                     })
+                    await sleep(500)
+                } while (showEvent[0].event != "newSwap")
 
-                    //console.log(showEvent)
-                    console.log(showEvent[0].returnValues.contractId)
-                    benContractId = showEvent[0].returnValues.contractId
-                    resolve()
-                } catch(error) {
-                    reject(error)
-                }
-            }, 1 * 1000))
+                //console.log(showEvent)
+                console.log(showEvent[0].returnValues.contractId)
+                benContractId = showEvent[0].returnValues.contractId
+            })
         })
 
-        /*it("check balances of Anna, Ben and HTLC on Goerli", async () => {
+        it("check balances of Anna, Ben and HTLC on Goerli", async () => {
+            const initialAnnaBalance = annaBalanceGoerli
+            const initialBenBalance = benBalanceGoerli
+            const initialHTLCBalance = htlcBalanceGoerli
+
             const annaBalanceNow = await annaERC20Contract.methods.balanceOf(Anna).call()
             const benBalanceNow = await annaERC20Contract.methods.balanceOf(Ben).call()
             const htlcBalance = await annaERC20Contract.methods.balanceOf(htlcGoerli.address).call()
 
-            const initialAnnaBalance = annaBalanceGoerli
-            const initialBenBalance = benBalanceGoerli
-
             assert.equal(annaBalanceNow, initialAnnaBalance - tokenAmount)
             assert.equal(benBalanceNow, initialBenBalance)
-            assert.equal(htlcBalance, tokenAmount)
+            assert.equal(htlcBalance, initialHTLCBalance - (-tokenAmount))
         })
 
         it("check balances of Anna, Ben and HTLC on Ropsten", async () => {
+            const initialAnnaBalance = annaBalanceRopsten
+            const initialBenBalance = benBalanceRopsten
+            const initialHTLCBalance = htlcBalanceRopsten
+
             const annaBalanceNow = await benERC20Contract.methods.balanceOf(Anna).call()
             const benBalanceNow = await benERC20Contract.methods.balanceOf(Ben).call()
             const htlcBalance = await benERC20Contract.methods.balanceOf(htlcRopsten.address).call()
 
-            const initialAnnaBalance = annaBalanceRopsten
-            const initialBenBalance = benBalanceRopsten
-
             assert.equal(annaBalanceNow, initialAnnaBalance)
             assert.equal(benBalanceNow, initialBenBalance - tokenAmount)
-            assert.equal(htlcBalance, tokenAmount)
-        })*/
+            assert.equal(htlcBalance, initialHTLCBalance - (-tokenAmount))
+        })
 
         it("claim() Ben Tokens on Ropsten from Anna works with secret", async () => {
             const web3 = new Web3(providerRopsten)
@@ -269,7 +286,7 @@ contract("Test for Cross Chain Swap", () => {
             await web3.eth.sendSignedTransaction("0x" + serializedTx.toString("hex"))
 
             const contractInstance = await ropstenContract.methods.getContract(benContractId).call({from: Anna})
-            //console.log(contractInstance)
+            console.log(contractInstance)
             //console.log(contractInstance.secretKey)
 
             assert.equal(contractInstance.secretKey, secretKey)
@@ -302,29 +319,23 @@ contract("Test for Cross Chain Swap", () => {
             await web3.eth.sendSignedTransaction("0x" + serializedTx.toString("hex"))
 
             const contractInstance = await goerliContract.methods.getContract(annaContractId).call({from: Ben})
-            //console.log(contractInstance)
+            console.log(contractInstance)
+            console.log(contractInstance.secretKey)
 
             assert.equal(contractInstance.secretKey, publicSecret)
             assert.isTrue(contractInstance.claimed)
             assert.isFalse(contractInstance.refunded)
         })
 
-        /*it("Anna's balance increases and htlc decreases", async () => {
+        it("Anna's balance increases and htlc decreases", async () => {
             const annaBalanceNow = await benERC20Contract.methods.balanceOf(Anna).call()
             const htlcBalance = await benERC20Contract.methods.balanceOf(htlcRopsten.address).call()
 
             const initialAnnaBalance = annaBalanceRopsten
+            const initialHTLCBalance = htlcBalanceRopsten
 
-            console.log("anna balance now: " + annaBalanceNow)
-            console.log("htlc balance: " + htlcBalance)
-            console.log("anna balance ropsten: " + annaBalanceRopsten)
-            console.log("anna balance ropsten (initial): " + initialAnnaBalance)
-
-            const annaBalanceShould = initialAnnaBalance + 5
-            console.log("anna balance (should): " + annaBalanceShould) //now 305
-            //console.log("token amount: " + tokenAmount)
-            //assert.equal(annaBalanceNow, annaBalanceShould) //initialAnnaBalance + tokenAmount) // 255??
-            assert.equal(htlcBalance, 0)
+            assert.equal(annaBalanceNow, initialAnnaBalance - (-tokenAmount))
+            assert.equal(htlcBalance, initialHTLCBalance)
         })
 
         it("Ben's balance increases and htlc decreases", async () => {
@@ -332,29 +343,21 @@ contract("Test for Cross Chain Swap", () => {
             const htlcBalance = await annaERC20Contract.methods.balanceOf(htlcGoerli.address).call()
 
             const initialBenBalance = benBalanceGoerli
+            const initialHTLCBalance = htlcBalanceGoerli
 
-            console.log("ben balance now: " + benBalanceNow)
-            console.log("htlc balance: " + htlcBalance)
-            console.log("ben balance goerli: " + benBalanceGoerli)
-            console.log("ben balance goerli (initial): " + initialBenBalance)
-
-            const benBalanceShould = initialBenBalance + 5
-            console.log("ben balance (should): " + benBalanceShould) //now 305 
-            //console.log("token amount: " + tokenAmount)
-            //assert.equal(benBalanceNow, benBalanceShould) //initialBenBalance + tokenAmount) // 255??
-            assert.equal(htlcBalance, 0)
-        })*/
+            assert.equal(benBalanceNow, initialBenBalance - (-tokenAmount)) 
+            assert.equal(htlcBalance, initialHTLCBalance)
+        })
     })
 
-//*/
 // h = await HashedTimelockERC20.at("0x4a73008E1354bc91EdE5E5348750F567F4A1Be06")
 // h = await HashedTimelockERC20.deployed()
-// await h.getPastEvents("newSwap", { fromBlock: 9251035, toBlock: 'latest' }) (ropsten)
-// await h.getPastEvents("newSwap", { fromBlock: 3910373, toBlock: 'latest' }) (goerli)
-// h.refund('0x605b7655af38069a9aa547b34a523175710e709a5fc1cfca38670d4aa43bee03', {from:accounts[1]}) last on ropsten
-// h.refund('0xe170a1c6c29e2409d052926f8ef11c430bbba0b04cb3d263590e4659ab6b390a') last on goerli
+// await h.getPastEvents("newSwap", { fromBlock: 9258984, toBlock: 'latest' }) (ropsten)
+// await h.getPastEvents("newSwap", { fromBlock: 3926508, toBlock: 'latest' }) (goerli)
+// h.refund('0xa426003c175ac687b431321004add2cf608908fe9c959ae45b0552066fee5c51', {from:accounts[1]}) last on ropsten
+// h.refund('0xc8d0a1e27df653afe40a31211d53e720792d29f721f4c26d4ce9a33458a01d34') last on goerli
 
-    describe("Test if Anna and Ben get refunded", function () {
+    /*describe("Test if Anna and Ben get refunded", function () {
 
         it("show balances of Anna and Ben on Goerli and Ropsten", async () => {
             annaBalanceGoerli = await annaERC20Contract.methods.balanceOf(Anna).call()
@@ -414,7 +417,7 @@ contract("Test for Cross Chain Swap", () => {
             await web3.eth.sendSignedTransaction("0x" + serializedTxSetSwap.toString("hex"))
 
 
-            return new Promise((resolve, reject) => setTimeout(async () => {
+            /*return new Promise((resolve, reject) => setTimeout(async () => {
                 try{
                     // get contract id 
                     const showEvent = await goerliContract.getPastEvents("newSwap", { 
@@ -428,7 +431,17 @@ contract("Test for Cross Chain Swap", () => {
                 } catch(error) {
                     reject(error)
                 }
-            }, 1 * 1000))
+            }, 1 * 1000))*/
+/*
+            await sleep(2000)
+            // get contract id 
+            const showEvent = await goerliContract.getPastEvents("newSwap", { 
+                filter: {sender: Anna, receiver: Ben}
+            })
+
+            //console.log(showEvent)
+            console.log(showEvent[0].returnValues.contractId)
+            annaContractId = showEvent[0].returnValues.contractId
         })
 
         it("approve and setSwap() from Ben works on Ropsten", async function () {
@@ -476,7 +489,7 @@ contract("Test for Cross Chain Swap", () => {
 
             await web3.eth.sendSignedTransaction("0x" + serializedTxSetSwap.toString("hex"))
 
-            return new Promise((resolve, reject) => setTimeout(async () => {
+            /*return new Promise((resolve, reject) => setTimeout(async () => {
                 try{
                     // get contract id
                     const showEvent = await ropstenContract.getPastEvents("newSwap", {
@@ -490,7 +503,17 @@ contract("Test for Cross Chain Swap", () => {
                 } catch(error) {
                     reject(error)
                 }
-            }, 1 * 1000))
+            }, 1 * 1000))*/
+/*
+            await sleep(2000)
+            // get contract id
+            const showEvent = await ropstenContract.getPastEvents("newSwap", {
+                filter: {sender: Ben, receiver: Anna}
+            })
+
+            //console.log(showEvent)
+            console.log(showEvent[0].returnValues.contractId)
+            benContractId = showEvent[0].returnValues.contractId
         })
 
         it("show balances of Anna and Ben on Goerli and Ropsten", async () => {
@@ -529,6 +552,13 @@ contract("Test for Cross Chain Swap", () => {
                     tx.sign(privateKeyBen)
                     var serializedTx = tx.serialize()
                     await web3.eth.sendSignedTransaction("0x" + serializedTx.toString("hex"))
+                    .on('transactionHash', async function(hash){
+                        let transactionReceipt = null
+                        while (transactionReceipt == null) { // Waiting until the transaction is mined
+                            transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                            await sleep(1000)
+                        }
+                    })
 
                     const contractInstance = await ropstenContract.methods.getContract(benContractId).call({from: Ben})
                     //console.log(contractInstance)
@@ -567,7 +597,14 @@ contract("Test for Cross Chain Swap", () => {
                     tx.sign(privateKeyAnna)
                     var serializedTx = tx.serialize()
                     await web3.eth.sendSignedTransaction("0x" + serializedTx.toString("hex"))
-        
+                    .on('transactionHash', async function(hash){
+                        let transactionReceipt = null
+                        while (transactionReceipt == null) { // Waiting until the transaction is mined
+                            transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                            await sleep(1000)
+                        }
+                    })
+
                     const contractInstance = await goerliContract.methods.getContract(annaContractId).call({from: Anna})
                     //console.log(contractInstance)
 
@@ -591,5 +628,7 @@ contract("Test for Cross Chain Swap", () => {
             annaBalanceRopsten = await benERC20Contract.methods.balanceOf(Anna).call()
             console.log("Anna ropsten: " + annaBalanceRopsten)
         })
-    })
-})
+    })*/
+
+
+//}) to uncomment
