@@ -56,14 +56,14 @@ App = {
                 console.log("HashedTimelock contract address: ", HashedTimelockERC20.address);
             });
         }).done(function () {
-            $.getJSON('../build/contracts/TokenSwapCoin.json', function (data) {
-                var TokenSwapCoinArtifact = data;
-                App.contracts.TokenSwapCoin = TruffleContract(TokenSwapCoinArtifact);
-                App.contracts.TokenSwapCoin.setProvider(App.web3Provider);
+            $.getJSON('../build/contracts/Coin.json', function (data) {
+                var CoinArtifact = data;
+                App.contracts.Coin = TruffleContract(CoinArtifact);
+                App.contracts.Coin.setProvider(App.web3Provider);
                 var input_address_token = $('#input-address-token').val();
-                App.contracts.TokenSwapCoin.at(input_address_token).then(function (TokenSwapCoin) {
-                    console.log("Token address: ", TokenSwapCoin.address);
-                    return TokenSwapCoin.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
+                App.contracts.Coin.at(input_address_token).then(function (Coin) {
+                    console.log("Token address: ", Coin.address);
+                    return Coin.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
                 })
                 //  return App.render();
                 return App.renderHomepage();
@@ -75,13 +75,14 @@ App = {
     testContracts: function () {
         console.log("testContracts was executed");
         var input_address_token = $('#input-address-token').val();
-        App.contracts.TokenSwapCoin.at("0x3f543AAC9B7b905A12b8a827DDD0F7898b279387").then(function (instance) {
-            TokenSwapCoinInstance = instance;
+        //change Coin address to anna or ben token-address if you want to use them instead of testtoken(TTN)
+        App.contracts.Coin.at("0xA5A38796Ec3dF359dB128D10f8385bEf6378A741").then(function (instance) {
+            CoinInstance = instance;
             var user_account = $('#accountAddress').val();
-            return TokenSwapCoinInstance.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
+            return CoinInstance.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
         }).then(function (balance) {
             console.log(balance.toNumber());
-            return TokenSwapCoinInstance.balanceOf("0x31281336c2e70E1D816b0be3f7b036Dbd14308d8");
+            return CoinInstance.balanceOf("0x31281336c2e70E1D816b0be3f7b036Dbd14308d8");
         }).then(function (balance) {
             console.log(balance.toNumber());
         })
@@ -119,7 +120,6 @@ App = {
         return App.testContracts();
     },
 
-    //FIXME: secret in bytes32 doesn't match hashlock
     claim: function () {
         console.log("Executed claim function");
         const contractId = $("#input-contractId").val();
