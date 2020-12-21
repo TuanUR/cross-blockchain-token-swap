@@ -1,0 +1,26 @@
+.welcome {
+    font-weight: bold;
+    color: gray;
+}
+
+#token-balance {
+    font-weight: bold;
+    color: green;
+}
+
+#token-totalSupply {
+    font-weight: bold;
+    color: red;
+}
+
+#startpage {
+    display: none;
+}
+
+#accountAddress {
+    font-weight: bold;
+}
+
+#contractId-info, #refund-contractId {
+    font-weight: bold;
+}
