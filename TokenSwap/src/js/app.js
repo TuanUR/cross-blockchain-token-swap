@@ -115,7 +115,7 @@ App = {
         var contractId = $("#input-contractId").val();
         $("#contractId-info").html(contractId);
         $("#refund-contractId").html(contractId);
-        //return App.timelockProgress();
+        //return App.timelockProgress(); for future development
         return App.testContracts();
     },
 
@@ -164,6 +164,11 @@ App = {
 
     // shows the timelock in percent in the progress bar on the homepage
     //FIXME: fires metamask transaction, that has to be confirmed specifically
+    //idea: use getContract(contractId).call() to not need a pop up window (web3 function)
+    //then calculate remaining time by using date.now() somehow
+    //timelock - date.now() = remaining time 
+    //timelock should be result[6]
+
     timelockProgress: function () {
         const contractId = $("#input-contractId").val();
         const input_address_htlc = $('#input-address-htlc').val();
