@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Coin is ERC20 {
     uint public initialSupply = 100;
-    constructor() public ERC20("TestToken", "TTN") {
+    constructor() public ERC20("TokenSwapCoin", "TSC") {
         _setupDecimals(0);
         _mint(msg.sender, initialSupply);
     }

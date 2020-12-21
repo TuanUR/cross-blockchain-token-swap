@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 contract HashedTimelockERC20 {
     
     event newSwap(
-        bytes32 indexed contractId,
+        bytes32 indexed swapId,
         address indexed sender,
         address indexed receiver,
         address tokenContract,
@@ -16,42 +16,50 @@ contract HashedTimelockERC20 {
         uint256 timelock
     );
 
-    event claimedSwap(bytes32 indexed contractId, string secretKey);
+    event claimedSwap(bytes32 indexed swapId, string secret);
 
-    event refundedSwap(bytes32 indexed contractId);
+    event refundedSwap(bytes32 indexed swapId);
 
-    struct HTLC{
+    struct Swap{
         address sender;
         address receiver;
         address tokenContract;
         uint256 tokenAmount;
         bytes32 hashlock;
-        string secretKey;
+        string secret;
         uint256 timelock;
         bool claimed;
         bool refunded;
     }
 
-    mapping(bytes32 => HTLC) contracts;
+    mapping(bytes32 => Swap) storedSwaps;
 
+    modifier swapExists(bytes32 _swapId) {
+        require(storedSwaps[_swapId].sender != address(0), "swapId does not exist");
+        _;
+    }
+
+    modifier contractNeitherClaimedNorRefunded(bytes32 _swapId) {
+        require(storedSwaps[_swapId].claimed == false, "swap already claimed");
+        require(storedSwaps[_swapId].refunded == false, "swap already refunded");
+        _;
+    }
+
+    // Set a swap with the receiver, the ERC20 token contract, a sha256 hashed secret, a timelock and the token amount
     function setSwap(
         address _receiver, 
         address _tokenContract, 
-        bytes32 _hashlock, 
+        bytes32 _hashlock,
         uint256 _timelock, 
         uint256 _tokenAmount
-    ) public returns(bytes32 contractId) {
-        require(ERC20(_tokenContract).allowance(msg.sender, address(this)) >= _tokenAmount, "token allowance must be > token amount");
-        // require(ERC20(_tokenContract).balanceOf(msg.sender) >= _tokenAmount, "token amount exceeds balance");
-        require(_timelock > block.timestamp, "timelock has to be in the future");
+    ) external returns(bytes32 swapId) {
+        require(ERC20(_tokenContract).allowance(msg.sender, address(this)) >= _tokenAmount, "token allowance must be >= token amount");
+        require(_timelock > block.timestamp, "timelock must be in the future");
         require(_tokenAmount > 0, "token amount must be > 0");
-        
-        // does not work well with test :(
-        //uint256 timelocked = block.timestamp + _timelock;
 
-        contractId = sha256(abi.encodePacked(msg.sender, _receiver, _tokenContract, _hashlock, _timelock, _tokenAmount));
-        
-        if(existingHTLC(contractId)){
+        swapId = sha256(abi.encodePacked(msg.sender, _receiver, _tokenContract, _hashlock, _timelock, _tokenAmount));
+
+        if(storedSwaps[swapId].sender != address(0)){
             revert("Contract already exists, use different parameters, ideally a different hashlock");
         }
 
@@ -59,7 +67,7 @@ contract HashedTimelockERC20 {
             revert("transferFrom sender to this failed");
         }
 
-        contracts[contractId] = HTLC(
+        storedSwaps[swapId] = Swap(
             msg.sender, 
             _receiver,
             _tokenContract,
@@ -72,7 +80,7 @@ contract HashedTimelockERC20 {
         );
 
         emit newSwap(
-            contractId,
+            swapId,
             msg.sender,
             _receiver,
             _tokenContract,
@@ -82,85 +90,73 @@ contract HashedTimelockERC20 {
         );
     }
 
-    function claim(bytes32 _contractId, string memory _secretKey) 
+    // Claim the swap with the id and the secrect within the timelock
+    function claim(bytes32 _swapId, string memory _secret)
         external
-        contractNeitherClaimedNorRefunded(_contractId)
-        contractExists(_contractId) returns (bool)
+        contractNeitherClaimedNorRefunded(_swapId)
+        swapExists(_swapId) 
+        returns (bool)
     {
-        require(contracts[_contractId].hashlock == sha256(abi.encodePacked(_secretKey)), "hashlock and secretKey do not match");
-        require(contracts[_contractId].receiver == msg.sender, "not receiver");
-        // require(contracts[_contractId].claimed == false, "already claimed");
-        // require(contracts[_contractId].refunded == false, "already refunded");
-        require(contracts[_contractId].timelock >= block.timestamp, "timelock time has passed");
+        require(storedSwaps[_swapId].receiver == msg.sender, "not receiver");
+        require(storedSwaps[_swapId].hashlock == sha256(abi.encodePacked(_secret)), "hashlock and secret do not match");
+        require(storedSwaps[_swapId].timelock >= block.timestamp, "timelock time has passed");
 
-        HTLC storage a = contracts[_contractId];
+        Swap storage a = storedSwaps[_swapId];
         ERC20(a.tokenContract).transfer(a.receiver, a.tokenAmount);
-        a.secretKey = _secretKey;
+        a.secret = _secret;
         a.claimed = true;
 
-        emit claimedSwap(_contractId, _secretKey);
+        emit claimedSwap(_swapId, _secret);
         return true;
     }
 
-    function refund(bytes32 _contractId)
+    // Refund the swap contract with the swap id after the timelock expires
+    function refund(bytes32 _swapId)
         external
-        contractNeitherClaimedNorRefunded(_contractId)
-        contractExists(_contractId) returns (bool) 
+        contractNeitherClaimedNorRefunded(_swapId)
+        swapExists(_swapId) 
+        returns (bool) 
     {
-        require(contracts[_contractId].sender == msg.sender, "not sender");
-        // require(contracts[_contractId].claimed == false, "already claimed");
-        // require(contracts[_contractId].refunded == false, "already refunded");
-        require(contracts[_contractId].timelock < block.timestamp, "timelock still active");
+        require(storedSwaps[_swapId].sender == msg.sender, "not sender");
+        require(storedSwaps[_swapId].timelock < block.timestamp, "timelock still active");
 
-        HTLC storage a = contracts[_contractId];
+        Swap storage a = storedSwaps[_swapId];
         ERC20(a.tokenContract).transfer(a.sender, a.tokenAmount);
         a.refunded = true;
 
-        emit refundedSwap(_contractId);
+        emit refundedSwap(_swapId);
         return true;
     }
 
-    function getContract(bytes32 _contractId) 
+    // Return the swap parameters
+    function getSwap(bytes32 _swapId) 
         public
         view   
-        contractExists(_contractId) returns(
+        swapExists(_swapId) 
+        returns(
             address sender,
             address receiver,
             address tokenContract,
             uint256 tokenAmount,
             bytes32 hashlock,
-            string memory secretKey,
+            string memory secret,
             uint256 timelock,
             bool claimed,
             bool refunded
         ) 
     {
-       HTLC storage a = contracts[_contractId];
+       Swap storage a = storedSwaps[_swapId];
        return (
            a.sender,
            a.receiver,
            a.tokenContract,
            a.tokenAmount,
            a.hashlock,
-           a.secretKey,
+           a.secret,
            a.timelock,
            a.claimed,
            a.refunded
        ); 
     }
 
-    function existingHTLC(bytes32 _contractId) internal view returns(bool exists) {
-        exists = (contracts[_contractId].sender != address(0));
-    }
-
-    modifier contractExists(bytes32 _contractId) {
-        require(existingHTLC(_contractId), "contractId does not exist");
-        _;
-    }
-
-    modifier contractNeitherClaimedNorRefunded(bytes32 _contractId) {
-        require(contracts[_contractId].claimed == false, "already claimed");
-        require(contracts[_contractId].refunded == false, "already refunded");
-        _;
-    }
 }
