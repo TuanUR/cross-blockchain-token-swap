@@ -14,9 +14,27 @@ if(fs.existsSync('secret.json')) {
 
 module.exports = {
   networks: {
+    ropsten: {
+      provider: () => new HDWalletProvider(secrets.mnemonic, 'https://ropsten.infura.io/v3/' + secrets.infuraApiKey, 0, 2),
+      network_id: '3'
+    },
     goerli: {
-      provider: () => new HDWalletProvider(secrets.mnemonic, 'https://goerli.infura.io/v3/' + secrets.infuraApiKey),
+      provider: () => new HDWalletProvider(secrets.mnemonic, 'https://goerli.infura.io/v3/' + secrets.infuraApiKey, 0, 2),
       network_id: '5'
+    },
+    rinkeby: {
+      provider: () => new HDWalletProvider(secrets.mnemonic, 'https://rinkeby.infura.io/v3/' + secrets.infuraApiKey, 0, 2),
+      network_id: '4'
+    },
+    development: {
+      host: "127.0.0.1",
+      port: 7545,
+      network_id: "*" // Match any network id
+    },
+    develop: {
+      host: "127.0.0.1",
+      port: 8545,
+      network_id: "*"
     }
   },
 

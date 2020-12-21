@@ -1,2 +1,9 @@
+<<<<<<< HEAD
+TokenSwap/secret.json
+Coin/secret.json
+Coin/build
+Coin/node_modules
+=======
 /secrets.json
 node_modules/
+>>>>>>> 8b16584f2e5f6c64aa558344a31a967fcc118f2f
