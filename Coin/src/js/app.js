@@ -95,6 +95,9 @@ App = {
     renderStartpage: function () {
         var startpage = $('#startpage');
         var homepage = $('#content');
+        var loader = $('#loader');
+
+        loader.hide();
         startpage.show();
         homepage.hide();
 
@@ -142,8 +145,7 @@ App = {
             loader.hide();
             allContent.show();
         })
-        return App.timelockProgress();   // for future development
-        //return App.testContracts();       deprecated
+        return App.timelockProgress();
     },
 
     claim: function () {
