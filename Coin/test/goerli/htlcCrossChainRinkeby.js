@@ -44,11 +44,11 @@ contract("Test for Cross Chain Swap", () => {
 
     const tokenAmount = 5
     const hashlock = "0x29d47406ac390709745e2da337abc011314b11d53e0a012d9d94590d722c4dee"
-    const secretKey = "Cross-Blockchain Token Swap mit Ethereum"
+    const secret = "Cross-Blockchain Token Swap mit Ethereum"
     let publicSecret
 
-    let annaContractId
-    let benContractId
+    let annaSwapId
+    let benSwapId
 
     let annaERC20Contract
     let benERC20Contract
@@ -159,8 +159,8 @@ contract("Test for Cross Chain Swap", () => {
                     filter: {sender: Anna, receiver: Ben}
                 })
             }
-            console.log(showEvent[0].returnValues.contractId)
-            annaContractId = showEvent[0].returnValues.contractId
+            console.log(showEvent[0].returnValues.swapId)
+            annaSwapId = showEvent[0].returnValues.swapId
 
             const annaBalanceNow = await annaERC20Contract.methods.balanceOf(Anna).call()
             const benBalanceNow = await annaERC20Contract.methods.balanceOf(Ben).call()
@@ -227,8 +227,8 @@ contract("Test for Cross Chain Swap", () => {
                     filter: {sender: Ben, receiver: Anna}
                 })
             }
-            console.log(showEvent[0].returnValues.contractId)
-            benContractId = showEvent[0].returnValues.contractId
+            console.log(showEvent[0].returnValues.swapId)
+            benSwapId = showEvent[0].returnValues.swapId
 
             const annaBalanceNow = await benERC20Contract.methods.balanceOf(Anna).call()
             const benBalanceNow = await benERC20Contract.methods.balanceOf(Ben).call()
@@ -250,7 +250,7 @@ contract("Test for Cross Chain Swap", () => {
                 gasPrice: web3.utils.toHex(100e9), // 50 Gwei
                 to: htlcRinkeby.address,
                 from: Anna,
-                data: rinkebyContract.methods.claim(benContractId, secretKey).encodeABI()
+                data: rinkebyContract.methods.claim(benSwapId, secret).encodeABI()
             }
 
             var tx = new Tx(txData, {'chain':'rinkeby'})
@@ -266,13 +266,13 @@ contract("Test for Cross Chain Swap", () => {
                 }
             })
 
-            const contractInstance = await rinkebyContract.methods.getContract(benContractId).call({from: Anna})
+            const swapInstance = await rinkebyContract.methods.getSwap(benSwapId).call({from: Anna})
 
-            assert.equal(contractInstance.secretKey, secretKey)
-            assert.isTrue(contractInstance.claimed)
-            assert.isFalse(contractInstance.refunded)
+            assert.equal(swapInstance.secret, secret)
+            assert.isTrue(swapInstance.claimed)
+            assert.isFalse(swapInstance.refunded)
 
-            publicSecret = contractInstance.secretKey
+            publicSecret = swapInstance.secret
 
             const annaBalanceNow = await benERC20Contract.methods.balanceOf(Anna).call()
             const htlcBalance = await benERC20Contract.methods.balanceOf(htlcRinkeby.address).call()
@@ -281,7 +281,7 @@ contract("Test for Cross Chain Swap", () => {
             assert.equal(htlcBalance, htlcBalanceRinkeby)
         })
 
-        it("claim() Anna Tokens on Goerli from Ben works with published secret ", async () => {
+        it("claim() Anna Tokens on Goerli from Ben works with published secret", async () => {
             const web3 = new Web3(providerGoerli)
 
             const txCount = await web3.eth.getTransactionCount(Ben, "pending")
@@ -292,7 +292,7 @@ contract("Test for Cross Chain Swap", () => {
                 gasPrice: web3.utils.toHex(100e9), // 50 Gwei
                 to: htlcGoerli.address,
                 from: Ben,
-                data: goerliContract.methods.claim(annaContractId, publicSecret).encodeABI()
+                data: goerliContract.methods.claim(annaSwapId, publicSecret).encodeABI()
             }
 
             var tx = new Tx(txData, {'chain':'goerli'})
@@ -308,11 +308,11 @@ contract("Test for Cross Chain Swap", () => {
                 }
             })
 
-            const contractInstance = await goerliContract.methods.getContract(annaContractId).call({from: Ben})
+            const swapInstance = await goerliContract.methods.getSwap(annaSwapId).call({from: Ben})
 
-            assert.equal(contractInstance.secretKey, publicSecret)
-            assert.isTrue(contractInstance.claimed)
-            assert.isFalse(contractInstance.refunded)
+            assert.equal(swapInstance.secret, publicSecret)
+            assert.isTrue(swapInstance.claimed)
+            assert.isFalse(swapInstance.refunded)
 
             const benBalanceNow = await annaERC20Contract.methods.balanceOf(Ben).call()
             const htlcBalance = await annaERC20Contract.methods.balanceOf(htlcGoerli.address).call()
@@ -338,7 +338,7 @@ contract("Test for Cross Chain Swap", () => {
         })
     })
 
-/*    describe("Test if Anna and Ben get refunded", function () {
+    describe("Test if Anna and Ben get refunded", function () {
 
         it("show balances of Anna and Ben on Goerli and Rinkeby", async () => {
             annaBalanceGoerli = await annaERC20Contract.methods.balanceOf(Anna).call()
@@ -408,8 +408,8 @@ contract("Test for Cross Chain Swap", () => {
                     filter: {sender: Anna, receiver: Ben}
                 })
             }
-            console.log(showEvent[0].returnValues.contractId)
-            annaContractId = showEvent[0].returnValues.contractId
+            console.log(showEvent[0].returnValues.swapId)
+            annaSwapId = showEvent[0].returnValues.swapId
         })
 
         it("approve and setSwap() from Ben works on Rinkeby", async function () {
@@ -469,8 +469,8 @@ contract("Test for Cross Chain Swap", () => {
                     filter: {sender: Ben, receiver: Anna}
                 })
             }
-            console.log(showEvent[0].returnValues.contractId)
-            benContractId = showEvent[0].returnValues.contractId
+            console.log(showEvent[0].returnValues.swapId)
+            benSwapId = showEvent[0].returnValues.swapId
         })
 
         it("show balances of Anna and Ben on Goerli and Rinkeby", async () => {
@@ -498,7 +498,7 @@ contract("Test for Cross Chain Swap", () => {
                 gasPrice: web3.utils.toHex(100e9), // 50 Gwei
                 to: htlcRinkeby.address,
                 from: Ben,
-                data: rinkebyContract.methods.refund(benContractId).encodeABI()
+                data: rinkebyContract.methods.refund(benSwapId).encodeABI()
             }
 
             var tx = new Tx(txData, {'chain':'rinkeby'})
@@ -513,10 +513,10 @@ contract("Test for Cross Chain Swap", () => {
                 }
             })
 
-            const contractInstance = await rinkebyContract.methods.getContract(benContractId).call({from: Ben})
+            const swapInstance = await rinkebyContract.methods.getSwap(benSwapId).call({from: Ben})
 
-            assert.isFalse(contractInstance.claimed)
-            assert.isTrue(contractInstance.refunded)
+            assert.isFalse(swapInstance.claimed)
+            assert.isTrue(swapInstance.refunded)
         })
 
         it("Anna didnt't claim and refunds", async function () {
@@ -532,7 +532,7 @@ contract("Test for Cross Chain Swap", () => {
                 gasPrice: web3.utils.toHex(100e9), // 50 Gwei
                 to: htlcGoerli.address,
                 from: Anna,
-                data: goerliContract.methods.refund(annaContractId).encodeABI()
+                data: goerliContract.methods.refund(annaSwapId).encodeABI()
             }
 
             var tx = new Tx(txData, {'chain':'goerli'})
@@ -547,11 +547,10 @@ contract("Test for Cross Chain Swap", () => {
                 }
             })
 
-            const contractInstance = await goerliContract.methods.getContract(annaContractId).call({from: Anna})
-            //console.log(contractInstance)
+            const swapInstance = await goerliContract.methods.getSwap(annaSwapId).call({from: Anna})
 
-            assert.isFalse(contractInstance.claimed)
-            assert.isTrue(contractInstance.refunded)
+            assert.isFalse(swapInstance.claimed)
+            assert.isTrue(swapInstance.refunded)
         })
 
         it("final balances of Anna and Ben on Goerli and Rinkeby", async () => {
@@ -565,5 +564,5 @@ contract("Test for Cross Chain Swap", () => {
             annaBalanceRinkeby = await benERC20Contract.methods.balanceOf(Anna).call()
             console.log("Anna rinkeby: " + annaBalanceRinkeby)
         })
-    })*/
+    })
 })

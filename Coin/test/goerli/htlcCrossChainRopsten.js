@@ -1,4 +1,4 @@
-/*const fs = require('fs')
+const fs = require('fs')
 
 let secrets
 
@@ -44,18 +44,17 @@ contract("Test for Cross Chain Swap", () => {
 
     const tokenAmount = 5
     const hashlock = "0x29d47406ac390709745e2da337abc011314b11d53e0a012d9d94590d722c4dee"
-    const secretKey = "Cross-Blockchain Token Swap mit Ethereum"
+    const secret = "Cross-Blockchain Token Swap mit Ethereum"
     let publicSecret
 
-    let annaContractId
-    let benContractId
+    let annaSwapId
+    let benSwapId
 
     let annaERC20Contract
     let benERC20Contract
     let goerliContract
     let ropstenContract
 
-    // truffle test --network goerli works fine <---> truffle test --network ropsten works fine
     before(async () => {
         const acc = await web3.eth.getAccounts()
         Anna = acc[0]
@@ -73,7 +72,6 @@ contract("Test for Cross Chain Swap", () => {
         await HashedTimelockERC20.setProvider(providerRopsten)
         htlcRopsten = await HashedTimelockERC20.at("0x4a73008E1354bc91EdE5E5348750F567F4A1Be06")
     })
-
 
     it("initialization of web3 for Goerli", async () => {
         const web3 = new Web3(providerGoerli)
@@ -108,7 +106,6 @@ contract("Test for Cross Chain Swap", () => {
         it("approve and setSwap() from Anna works on Goerli", async function () {
             this.timeout(0)
             const web3 = new Web3(providerGoerli)
-            //await HashedTimelockERC20.setProvider(providerGoerli)
 
             const txCountApprove = await web3.eth.getTransactionCount(Anna, "pending")
 
@@ -155,19 +152,25 @@ contract("Test for Cross Chain Swap", () => {
                     transactionReceipt = await web3.eth.getTransactionReceipt(hash)
                     await sleep(1000)
                 }
-                // get contract id
-                let showEvent
-                do {
-                    showEvent = await goerliContract.getPastEvents("newSwap", { 
-                        filter: {sender: Anna, receiver: Ben}
-                    })
-                    await sleep(500)
-                } while (showEvent[0].event != "newSwap")
-
-                //console.log(showEvent)
-                console.log(showEvent[0].returnValues.contractId)
-                annaContractId = showEvent[0].returnValues.contractId
             })
+
+            let showEvent = undefined
+            while (showEvent === undefined) {
+                await sleep(1000)
+                showEvent = await goerliContract.getPastEvents("newSwap", { 
+                    filter: {sender: Anna, receiver: Ben}
+                })
+            }
+            console.log(showEvent[0].returnValues.swapId)
+            annaSwapId = showEvent[0].returnValues.swapId
+
+            const annaBalanceNow = await annaERC20Contract.methods.balanceOf(Anna).call()
+            const benBalanceNow = await annaERC20Contract.methods.balanceOf(Ben).call()
+            const htlcBalance = await annaERC20Contract.methods.balanceOf(htlcGoerli.address).call()
+
+            assert.equal(annaBalanceNow, annaBalanceGoerli - tokenAmount)
+            assert.equal(benBalanceNow, benBalanceGoerli)
+            assert.equal(htlcBalance, htlcBalanceGoerli - (-tokenAmount))
         })
 
         it("approve and setSwap() from Ben works on Ropsten", async function () {
@@ -233,9 +236,27 @@ contract("Test for Cross Chain Swap", () => {
                 console.log(showEvent[0].returnValues.contractId)
                 benContractId = showEvent[0].returnValues.contractId
             })
+
+            let showEvent = undefined
+            while (showEvent === undefined){
+                await sleep(1000)
+                showEvent = await ropstenContract.getPastEvents("newSwap", {
+                    filter: {sender: Ben, receiver: Anna}
+                })
+            }
+            console.log(showEvent[0].returnValues.swapId)
+            benSwapId = showEvent[0].returnValues.swapId
+
+            const annaBalanceNow = await benERC20Contract.methods.balanceOf(Anna).call()
+            const benBalanceNow = await benERC20Contract.methods.balanceOf(Ben).call()
+            const htlcBalance = await benERC20Contract.methods.balanceOf(htlcRopsten.address).call()
+
+            assert.equal(annaBalanceNow, annaBalanceRopsten)
+            assert.equal(benBalanceNow, benBalanceRopsten - tokenAmount)
+            assert.equal(htlcBalance, htlcBalanceRopsten - (-tokenAmount))
         })
 
-        it("check balances of Anna, Ben and HTLC on Goerli", async () => {
+        /*it("check balances of Anna, Ben and HTLC on Goerli", async () => {
             const initialAnnaBalance = annaBalanceGoerli
             const initialBenBalance = benBalanceGoerli
             const initialHTLCBalance = htlcBalanceGoerli
@@ -261,11 +282,10 @@ contract("Test for Cross Chain Swap", () => {
             assert.equal(annaBalanceNow, initialAnnaBalance)
             assert.equal(benBalanceNow, initialBenBalance - tokenAmount)
             assert.equal(htlcBalance, initialHTLCBalance - (-tokenAmount))
-        })
+        })*/
 
         it("claim() Ben Tokens on Ropsten from Anna works with secret", async () => {
             const web3 = new Web3(providerRopsten)
-            //await HashedTimelockERC20.setProvider(providerRopsten)
 
             const txCount = await web3.eth.getTransactionCount(Anna, "pending")
 
@@ -284,16 +304,27 @@ contract("Test for Cross Chain Swap", () => {
             var serializedTx = tx.serialize()
 
             await web3.eth.sendSignedTransaction("0x" + serializedTx.toString("hex"))
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
+                }
+            })
 
-            const contractInstance = await ropstenContract.methods.getContract(benContractId).call({from: Anna})
-            console.log(contractInstance)
-            //console.log(contractInstance.secretKey)
+            const swapInstance = await ropstenContract.methods.getSwap(benSwapId).call({from: Anna})
 
-            assert.equal(contractInstance.secretKey, secretKey)
-            assert.isTrue(contractInstance.claimed)
-            assert.isFalse(contractInstance.refunded)
+            assert.equal(swapInstance.secret, secret)
+            assert.isTrue(swapInstance.claimed)
+            assert.isFalse(swapInstance.refunded)
 
-            publicSecret = contractInstance.secretKey
+            publicSecret = swapInstance.secret
+
+            const annaBalanceNow = await benERC20Contract.methods.balanceOf(Anna).call()
+            const htlcBalance = await benERC20Contract.methods.balanceOf(htlcRinkeby.address).call()
+
+            assert.equal(annaBalanceNow, annaBalanceRopsten - (-tokenAmount))
+            assert.equal(htlcBalance, htlcBalanceRopsten)
         })
 
         it("claim() Anna Tokens on Goerli from Ben works with published secret ", async () => {
@@ -317,17 +348,28 @@ contract("Test for Cross Chain Swap", () => {
             var serializedTx = tx.serialize()
 
             await web3.eth.sendSignedTransaction("0x" + serializedTx.toString("hex"))
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
+                }
+            })
 
-            const contractInstance = await goerliContract.methods.getContract(annaContractId).call({from: Ben})
-            console.log(contractInstance)
-            console.log(contractInstance.secretKey)
+            const swapInstance = await goerliContract.methods.getSwap(annaSwapId).call({from: Ben})
 
-            assert.equal(contractInstance.secretKey, publicSecret)
-            assert.isTrue(contractInstance.claimed)
-            assert.isFalse(contractInstance.refunded)
+            assert.equal(swapInstance.secret, publicSecret)
+            assert.isTrue(swapInstance.claimed)
+            assert.isFalse(swapInstance.refunded)
+
+            const benBalanceNow = await annaERC20Contract.methods.balanceOf(Ben).call()
+            const htlcBalance = await annaERC20Contract.methods.balanceOf(htlcGoerli.address).call()
+
+            assert.equal(benBalanceNow, benBalanceGoerli - (-tokenAmount)) 
+            assert.equal(htlcBalance, htlcBalanceGoerli)
         })
 
-        it("Anna's balance increases and htlc decreases", async () => {
+        /*it("Anna's balance increases and htlc decreases", async () => {
             const annaBalanceNow = await benERC20Contract.methods.balanceOf(Anna).call()
             const htlcBalance = await benERC20Contract.methods.balanceOf(htlcRopsten.address).call()
 
@@ -347,17 +389,10 @@ contract("Test for Cross Chain Swap", () => {
 
             assert.equal(benBalanceNow, initialBenBalance - (-tokenAmount)) 
             assert.equal(htlcBalance, initialHTLCBalance)
-        })
+        })*/
     })
 
-// h = await HashedTimelockERC20.at("0x4a73008E1354bc91EdE5E5348750F567F4A1Be06")
-// h = await HashedTimelockERC20.deployed()
-// await h.getPastEvents("newSwap", { fromBlock: 9258984, toBlock: 'latest' }) (ropsten)
-// await h.getPastEvents("newSwap", { fromBlock: 3926508, toBlock: 'latest' }) (goerli)
-// h.refund('0xa426003c175ac687b431321004add2cf608908fe9c959ae45b0552066fee5c51', {from:accounts[1]}) last on ropsten
-// h.refund('0xc8d0a1e27df653afe40a31211d53e720792d29f721f4c26d4ce9a33458a01d34') last on goerli
-
-    /*describe("Test if Anna and Ben get refunded", function () {
+    describe("Test if Anna and Ben get refunded", function () {
 
         it("show balances of Anna and Ben on Goerli and Ropsten", async () => {
             annaBalanceGoerli = await annaERC20Contract.methods.balanceOf(Anna).call()
@@ -374,18 +409,16 @@ contract("Test for Cross Chain Swap", () => {
         it("approve and setSwap() from Anna works on Goerli", async function () {
             this.timeout(0)
             const web3 = new Web3(providerGoerli)
-            //await HashedTimelockERC20.setProvider(providerGoerli)
 
             const txCountApprove = await web3.eth.getTransactionCount(Anna, "pending")
 
             const txDataApprove = {
                 nonce: web3.utils.toHex(txCountApprove),
                 gasLimit: web3.utils.toHex(2100000),
-                gasPrice: web3.utils.toHex(75e9), // 50 Gwei
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
                 to: AnnaERC20.address,
                 from: Anna,
-                data: annaERC20Contract.methods.approve(htlcGoerli.address, tokenAmount).encodeABI(),
-                chainId: 5
+                data: annaERC20Contract.methods.approve(htlcGoerli.address, tokenAmount).encodeABI()
             }
 
             var txApprove = new Tx(txDataApprove, {'chain':'goerli'})
@@ -403,11 +436,10 @@ contract("Test for Cross Chain Swap", () => {
             const txDataSetSwap = {
                 nonce: web3.utils.toHex(txCountSetSwap),
                 gasLimit: web3.utils.toHex(2100000),
-                gasPrice: web3.utils.toHex(75e9), // 50 Gwei
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
                 to: htlcGoerli.address,
                 from: Anna,
-                data: goerliContract.methods.setSwap(Ben, AnnaERC20.address, hashlock, timelock, tokenAmount).encodeABI(), 
-                chainId: 5
+                data: goerliContract.methods.setSwap(Ben, AnnaERC20.address, hashlock, timelock, tokenAmount).encodeABI()
             }
 
             var txSetSwap = new Tx(txDataSetSwap, {'chain':'goerli'})
@@ -415,38 +447,27 @@ contract("Test for Cross Chain Swap", () => {
             var serializedTxSetSwap = txSetSwap.serialize()
 
             await web3.eth.sendSignedTransaction("0x" + serializedTxSetSwap.toString("hex"))
-
-
-            /*return new Promise((resolve, reject) => setTimeout(async () => {
-                try{
-                    // get contract id 
-                    const showEvent = await goerliContract.getPastEvents("newSwap", { 
-                        filter: {sender: Anna, receiver: Ben}
-                    })
-
-                    //console.log(showEvent)
-                    console.log(showEvent[0].returnValues.contractId)
-                    annaContractId = showEvent[0].returnValues.contractId
-                    resolve()
-                } catch(error) {
-                    reject(error)
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
                 }
-            }, 1 * 1000))*/
-/*
-            await sleep(2000)
-            // get contract id 
-            const showEvent = await goerliContract.getPastEvents("newSwap", { 
-                filter: {sender: Anna, receiver: Ben}
             })
 
-            //console.log(showEvent)
-            console.log(showEvent[0].returnValues.contractId)
-            annaContractId = showEvent[0].returnValues.contractId
+            let showEvent = undefined
+            while (showEvent === undefined) {
+                await sleep(1000)
+                showEvent = await goerliContract.getPastEvents("newSwap", { 
+                    filter: {sender: Anna, receiver: Ben}
+                })
+            }
+            console.log(showEvent[0].returnValues.swapId)
+            annaSwapId = showEvent[0].returnValues.swapId
         })
 
         it("approve and setSwap() from Ben works on Ropsten", async function () {
             this.timeout(0)
-
             const web3 = new Web3(providerRopsten)
 
             const txCountApprove = await web3.eth.getTransactionCount(Ben, "pending")
@@ -454,11 +475,10 @@ contract("Test for Cross Chain Swap", () => {
             const txDataApprove = {
                 nonce: web3.utils.toHex(txCountApprove),
                 gasLimit: web3.utils.toHex(2100000),
-                gasPrice: web3.utils.toHex(50e9), // 50 Gwei
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
                 to: BenERC20.address,
                 from: Ben,
-                data: benERC20Contract.methods.approve(htlcRopsten.address, tokenAmount).encodeABI(),
-                chainId: 3
+                data: benERC20Contract.methods.approve(htlcRopsten.address, tokenAmount).encodeABI()
             }
 
             var txApprove = new Tx(txDataApprove, {'chain':'ropsten'})
@@ -476,11 +496,10 @@ contract("Test for Cross Chain Swap", () => {
             const txDataSetSwap = {
                 nonce: web3.utils.toHex(txCountSetSwap),
                 gasLimit: web3.utils.toHex(2100000),
-                gasPrice: web3.utils.toHex(50e9), // 50 Gwei
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
                 to: htlcRopsten.address,
                 from: Ben,
-                data: ropstenContract.methods.setSwap(Anna, BenERC20.address, hashlock, timelock, tokenAmount).encodeABI(),
-                chainId: 3
+                data: ropstenContract.methods.setSwap(Anna, BenERC20.address, hashlock, timelock, tokenAmount).encodeABI()
             }
 
             var txSetSwap = new Tx(txDataSetSwap, {'chain':'ropsten'})
@@ -488,32 +507,23 @@ contract("Test for Cross Chain Swap", () => {
             var serializedTxSetSwap = txSetSwap.serialize()
 
             await web3.eth.sendSignedTransaction("0x" + serializedTxSetSwap.toString("hex"))
-
-            /*return new Promise((resolve, reject) => setTimeout(async () => {
-                try{
-                    // get contract id
-                    const showEvent = await ropstenContract.getPastEvents("newSwap", {
-                        filter: {sender: Ben, receiver: Anna}
-                    })
-
-                    //console.log(showEvent)
-                    console.log(showEvent[0].returnValues.contractId)
-                    benContractId = showEvent[0].returnValues.contractId
-                    resolve()
-                } catch(error) {
-                    reject(error)
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
                 }
-            }, 1 * 1000))*/
-/*
-            await sleep(2000)
-            // get contract id
-            const showEvent = await ropstenContract.getPastEvents("newSwap", {
-                filter: {sender: Ben, receiver: Anna}
             })
 
-            //console.log(showEvent)
-            console.log(showEvent[0].returnValues.contractId)
-            benContractId = showEvent[0].returnValues.contractId
+            let showEvent = undefined
+            while (showEvent === undefined){
+                await sleep(1000)
+                showEvent = await ropstenContract.getPastEvents("newSwap", {
+                    filter: {sender: Ben, receiver: Anna}
+                })
+            }
+            console.log(showEvent[0].returnValues.swapId)
+            benSwapId = showEvent[0].returnValues.swapId
         })
 
         it("show balances of Anna and Ben on Goerli and Ropsten", async () => {
@@ -530,94 +540,73 @@ contract("Test for Cross Chain Swap", () => {
 
         it("Anna does not claim, so Ben refunds", async function () {
             this.timeout(0)
+            await sleep(20000)
+            const web3 = new Web3(providerRopsten)
 
-            return new Promise((resolve, reject) => setTimeout(async () => {
-                try{
-                    const web3 = new Web3(providerRopsten)
-                    //await HashedTimelockERC20.setProvider(providerRopsten)
-        
-                    const txCount = await web3.eth.getTransactionCount(Ben, "pending")
-        
-                    const txData = {
-                        nonce: web3.utils.toHex(txCount),
-                        gasLimit: web3.utils.toHex(2100000),
-                        gasPrice: web3.utils.toHex(75e9), // 50 Gwei
-                        to: htlcRopsten.address,
-                        from: Ben,
-                        data: ropstenContract.methods.refund(benContractId).encodeABI(),
-                        chainId: 3
-                    }
-        
-                    var tx = new Tx(txData, {'chain':'ropsten'})
-                    tx.sign(privateKeyBen)
-                    var serializedTx = tx.serialize()
-                    await web3.eth.sendSignedTransaction("0x" + serializedTx.toString("hex"))
-                    .on('transactionHash', async function(hash){
-                        let transactionReceipt = null
-                        while (transactionReceipt == null) { // Waiting until the transaction is mined
-                            transactionReceipt = await web3.eth.getTransactionReceipt(hash)
-                            await sleep(1000)
-                        }
-                    })
+            const txCount = await web3.eth.getTransactionCount(Ben, "pending")
 
-                    const contractInstance = await ropstenContract.methods.getContract(benContractId).call({from: Ben})
-                    //console.log(contractInstance)
-                    //console.log(contractInstance.secretKey)
+            const txData = {
+                nonce: web3.utils.toHex(txCount),
+                gasLimit: web3.utils.toHex(2100000),
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
+                to: htlcRopsten.address,
+                from: Ben,
+                data: ropstenContract.methods.refund(benSwapId).encodeABI()
+            }
 
-                    assert.isFalse(contractInstance.claimed)
-                    assert.isTrue(contractInstance.refunded)
-                    resolve()
-                } catch(error) {
-                    reject(error)
+            var tx = new Tx(txData, {'chain':'ropsten'})
+            tx.sign(privateKeyBen)
+            var serializedTx = tx.serialize()
+            await web3.eth.sendSignedTransaction("0x" + serializedTx.toString("hex"))
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
                 }
-            }, 20 * 1000))
+            })
+
+            const swapInstance = await ropstenContract.methods.getSwap(benSwapId).call({from: Ben})
+
+            assert.isFalse(swapInstance.claimed)
+            assert.isTrue(swapInstance.refunded)
         })
 
         it("Anna didnt't claim and refunds", async function () {
             this.timeout(0)
+            await sleep(20000)
+            const web3 = new Web3(providerGoerli)
 
-            return new Promise((resolve, reject) => setTimeout(async () => {
-                try{
-                    const web3 = new Web3(providerGoerli)
-                    //await HashedTimelockERC20.setProvider(providerGoerli)
-        
-                    const txCount = await web3.eth.getTransactionCount(Anna, "pending")
-        
-                    const txData = {
-                        nonce: web3.utils.toHex(txCount),
-                        gasLimit: web3.utils.toHex(2100000),
-                        gasPrice: web3.utils.toHex(75e9), // 50 Gwei
-                        to: htlcGoerli.address,
-                        from: Anna,
-                        data: goerliContract.methods.refund(annaContractId).encodeABI(),
-                        chainId: 5
-                    }
-        
-                    var tx = new Tx(txData, {'chain':'goerli'})
-                    tx.sign(privateKeyAnna)
-                    var serializedTx = tx.serialize()
-                    await web3.eth.sendSignedTransaction("0x" + serializedTx.toString("hex"))
-                    .on('transactionHash', async function(hash){
-                        let transactionReceipt = null
-                        while (transactionReceipt == null) { // Waiting until the transaction is mined
-                            transactionReceipt = await web3.eth.getTransactionReceipt(hash)
-                            await sleep(1000)
-                        }
-                    })
+            const txCount = await web3.eth.getTransactionCount(Anna, "pending")
 
-                    const contractInstance = await goerliContract.methods.getContract(annaContractId).call({from: Anna})
-                    //console.log(contractInstance)
+            const txData = {
+                nonce: web3.utils.toHex(txCount),
+                gasLimit: web3.utils.toHex(2100000),
+                gasPrice: web3.utils.toHex(100e9), // 50 Gwei
+                to: htlcGoerli.address,
+                from: Anna,
+                data: goerliContract.methods.refund(annaSwapId).encodeABI()
+            }
 
-                    assert.isFalse(contractInstance.claimed)
-                    assert.isTrue(contractInstance.refunded)
-                    resolve()
-                } catch(error) {
-                    reject(error)
+            var tx = new Tx(txData, {'chain':'goerli'})
+            tx.sign(privateKeyAnna)
+            var serializedTx = tx.serialize()
+            await web3.eth.sendSignedTransaction("0x" + serializedTx.toString("hex"))
+            .on('transactionHash', async function(hash){
+                let transactionReceipt = null
+                while (transactionReceipt == null) { // Waiting until the transaction is mined
+                    transactionReceipt = await web3.eth.getTransactionReceipt(hash)
+                    await sleep(1000)
                 }
-            }, 20 * 1000))
+            })
+
+            const swapInstance = await goerliContract.methods.getSwap(annaSwapId).call({from: Anna})
+
+            assert.isFalse(swapInstance.claimed)
+            assert.isTrue(swapInstance.refunded)
         })
 
-        it("show balances of Anna and Ben on Goerli and Ropsten", async () => {
+        it("final balances of Anna and Ben on Goerli and Ropsten", async () => {
             annaBalanceGoerli = await annaERC20Contract.methods.balanceOf(Anna).call()
             console.log("Anna goerli: " + annaBalanceGoerli)
             benBalanceGoerli = await annaERC20Contract.methods.balanceOf(Ben).call()
@@ -628,7 +617,7 @@ contract("Test for Cross Chain Swap", () => {
             annaBalanceRopsten = await benERC20Contract.methods.balanceOf(Anna).call()
             console.log("Anna ropsten: " + annaBalanceRopsten)
         })
-    })*/
+    })
 
 
-//}) to uncomment
+})
