@@ -116,11 +116,13 @@ App = {
         var homepage = $('#content');
         var claimPage = $('#claim');
         var refundPage = $('#refund');
-        var loader = $('#all-content');
+        var allContent = $('#all-content');
+        var loader = $('#loader');
 
-        loader.hide();
+        allContent.hide();
         startpage.hide();
         homepage.show();
+        loader.show();
 
         const input_address_htlc = $('#input-address-htlc').val();
         var contractId = $("#input-contractId").val();
@@ -137,7 +139,8 @@ App = {
             } else {
                 console.log("Not Sender nor Receiver!");
             }
-            loader.show();
+            loader.hide();
+            allContent.show();
         })
         return App.timelockProgress();   // for future development
         //return App.testContracts();       deprecated
