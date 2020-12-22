@@ -136,9 +136,9 @@ App = {
             return HashedTimelockERC20.getContract(contractId);
         }).then(function (result) {
             if (App.account === result[0]) {
-                refundPage.hide();
-            } else if (App.account === result[1]){
                 claimPage.hide();
+            } else if (App.account === result[1]){
+                refundPage.hide();
             } else {
                 console.log("Not Sender nor Receiver!");
             }
