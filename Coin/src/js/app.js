@@ -39,7 +39,6 @@ App = {
 
     // instantiate smart contract so web3 knows where to find it and
     // how it works => enables interacting with Ethereum via web3
-    //FIXME
     accessContracts: function () {
         $.getJSON('../build/contracts/HashedTimelockERC20.json', function (data) {
             // Get the necessary contract artifact file
@@ -55,33 +54,38 @@ App = {
             App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
                 console.log("HashedTimelock contract address: ", HashedTimelockERC20.address);
             });
-        }).done(function () {
-            $.getJSON('../build/contracts/TokenSwapCoin.json', function (data) {
-                var TokenSwapCoinArtifact = data;
-                App.contracts.TokenSwapCoin = TruffleContract(TokenSwapCoinArtifact);
-                App.contracts.TokenSwapCoin.setProvider(App.web3Provider);
+            return App.renderHomepage();
+        })
+            /* try with coin disabled - not needed at all?
+            .done(function () {
+            $.getJSON('../build/contracts/Coin.json', function (data) {
+                var CoinArtifact = data;
+                App.contracts.Coin = TruffleContract(CoinArtifact);
+                App.contracts.Coin.setProvider(App.web3Provider);
                 var input_address_token = $('#input-address-token').val();
-                App.contracts.TokenSwapCoin.at(input_address_token).then(function (TokenSwapCoin) {
-                    console.log("Token address: ", TokenSwapCoin.address);
-                    return TokenSwapCoin.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
+                App.contracts.Coin.at(input_address_token).then(function (Coin) {
+                    console.log("Token address: ", Coin.address);
+                    return Coin.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
                 })
                 //  return App.render();
-                return App.renderHomepage();
+
             })
         });
+        */
     },
 
     // for development only - might delete now
     testContracts: function () {
         console.log("testContracts was executed");
         var input_address_token = $('#input-address-token').val();
-        App.contracts.TokenSwapCoin.at("0x3f543AAC9B7b905A12b8a827DDD0F7898b279387").then(function (instance) {
-            TokenSwapCoinInstance = instance;
+        //change Coin address to anna or ben token-address if you want to use them instead of testtoken(TTN)
+        App.contracts.Coin.at("0xA5A38796Ec3dF359dB128D10f8385bEf6378A741").then(function (instance) {
+            CoinInstance = instance;
             var user_account = $('#accountAddress').val();
-            return TokenSwapCoinInstance.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
+            return CoinInstance.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
         }).then(function (balance) {
             console.log(balance.toNumber());
-            return TokenSwapCoinInstance.balanceOf("0x31281336c2e70E1D816b0be3f7b036Dbd14308d8");
+            return CoinInstance.balanceOf("0x31281336c2e70E1D816b0be3f7b036Dbd14308d8");
         }).then(function (balance) {
             console.log(balance.toNumber());
         })
@@ -115,15 +119,13 @@ App = {
         var contractId = $("#input-contractId").val();
         $("#contractId-info").html(contractId);
         $("#refund-contractId").html(contractId);
-        //return App.timelockProgress(); for future development
-        return App.testContracts();
+        return App.timelockProgress();   // for future development
+        //return App.testContracts();       deprecated
     },
 
-    //FIXME: secret in bytes32 doesn't match hashlock
     claim: function () {
         console.log("Executed claim function");
         const contractId = $("#input-contractId").val();
-        //const secret = web3.fromAscii(($("#secret-claim").val())); string to bytes32 convert function
         const secret = $("#secret-claim").val();
         console.log(secret);
         var input_address_htlc = $('#input-address-htlc').val();
@@ -147,8 +149,8 @@ App = {
         const contractId = $("#input-contractId").val();
         const input_address_htlc = $('#input-address-htlc').val();
         console.log(contractId);
-        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (instance) {
-            return instance.refund(contractId, {
+        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
+            return HashedTimelockERC20.refund(contractId, {
                 from: App.account,
                 gas: 500000
             });
@@ -164,17 +166,30 @@ App = {
 
     // shows the timelock in percent in the progress bar on the homepage
     //FIXME: fires metamask transaction, that has to be confirmed specifically
+
     //idea: use getContract(contractId).call() to not need a pop up window (web3 function)
     //then calculate remaining time by using date.now() somehow
     //timelock - date.now() = remaining time 
     //timelock should be result[6]
 
     timelockProgress: function () {
+        console.log("timelockProgress was executed");
         const contractId = $("#input-contractId").val();
         const input_address_htlc = $('#input-address-htlc').val();
-        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (instance) {
-            return instance.getContract(contractId);
+        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
+            return HashedTimelockERC20.getContract(contractId);
         }).then(function(result){
+            //to be tested => does this display the right remaining time?
+            console.log(result[6].toNumber() - Date.now());
+        })
+    },
+
+    testCall: function() {
+        const input_address_htlc = $('#input-address-htlc').val();
+        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
+            console.log("success");
+            //return HashedTimelockERC20.getContract("0x8c8079aa503f69367cb38778f54ac3a6c8f61a4a1d183b96f9381577353e2e79");
+        }).then(function (result) {
             console.log(result);
         })
     }
