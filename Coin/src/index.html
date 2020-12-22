@@ -40,7 +40,7 @@
                         -->
                         <label for="input-contractId">Associated ContractId (emitted by setSwap() ):</label>
                         <input id="input-contractId" class="form-control input-lg" type="text" placeholder="0x0"
-                               value="0x8c8079aa503f69367cb38778f54ac3a6c8f61a4a1d183b96f9381577353e2e79"/>
+                               value="0x82ac5b74e895ae29078db2539e7c9e10cd03122d5ca2debaa20ecfb22dee5740"/>
                         </br>
                         <span class="input-group-btn">
                             <!--implement link to success page with contract details?-->
@@ -54,11 +54,15 @@
         <div id="content" class="text-center" style="display: none;">
             <div id="contract-details">
                 You entered contractId: <span id="contractId-info"></span>
+                <hr>
             </div>
             <!--progress bar to show how much time of timelock has passed?-->
-            <div class="progress">
-                <div id="progress" class="progress-bar progress-bar-striped-active"
-                     aria-valuemin="0" aria-valuemax="100">
+            <div class="text-center">
+                <h3>Timelock progress</h3>
+                <div class="progress">
+                    <div id="progress" class="progress-bar progress-bar-striped-active"
+                         aria-valuemin="0" aria-valuemax="100">
+                    </div>
                 </div>
             </div>
             <div class="contract-actions">

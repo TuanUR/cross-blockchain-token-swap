@@ -56,22 +56,22 @@ App = {
             });
             return App.renderHomepage();
         })
-            /* try with coin disabled - not needed at all?
-            .done(function () {
-            $.getJSON('../build/contracts/Coin.json', function (data) {
-                var CoinArtifact = data;
-                App.contracts.Coin = TruffleContract(CoinArtifact);
-                App.contracts.Coin.setProvider(App.web3Provider);
-                var input_address_token = $('#input-address-token').val();
-                App.contracts.Coin.at(input_address_token).then(function (Coin) {
-                    console.log("Token address: ", Coin.address);
-                    return Coin.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
-                })
-                //  return App.render();
-
+        /* try with coin disabled - not needed at all?
+        .done(function () {
+        $.getJSON('../build/contracts/Coin.json', function (data) {
+            var CoinArtifact = data;
+            App.contracts.Coin = TruffleContract(CoinArtifact);
+            App.contracts.Coin.setProvider(App.web3Provider);
+            var input_address_token = $('#input-address-token').val();
+            App.contracts.Coin.at(input_address_token).then(function (Coin) {
+                console.log("Token address: ", Coin.address);
+                return Coin.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
             })
-        });
-        */
+            //  return App.render();
+
+        })
+    });
+    */
     },
 
     // for development only - might delete now
@@ -154,7 +154,7 @@ App = {
                 from: App.account,
                 gas: 500000
             });
-        }).then(function(err, result) {
+        }).then(function (err, result) {
             if (err) {
                 console.log(err)
             } else {
@@ -178,13 +178,15 @@ App = {
         const input_address_htlc = $('#input-address-htlc').val();
         App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
             return HashedTimelockERC20.getContract(contractId);
-        }).then(function(result){
+        }).then(function (result) {
             //to be tested => does this display the right remaining time?
-            console.log(result[6].toNumber() - Date.now());
+            console.log("DateNow in sec", Math.floor(Date.now() / 1000));
+            console.log("timelock in sec",result[6].toNumber());
+            console.log("remaining", result[6].toNumber() - Math.floor(Date.now() / 1000));
         })
     },
 
-    testCall: function() {
+    testCall: function () {
         const input_address_htlc = $('#input-address-htlc').val();
         App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
             console.log("success");
