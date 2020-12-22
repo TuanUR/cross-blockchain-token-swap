@@ -114,11 +114,31 @@ App = {
         console.log("Render homepage was executed");
         var startpage = $('#startpage');
         var homepage = $('#content');
+        var claimPage = $('#claim');
+        var refundPage = $('#refund');
+        var loader = $('#all-content');
+
+        loader.hide();
         startpage.hide();
         homepage.show();
+
+        const input_address_htlc = $('#input-address-htlc').val();
         var contractId = $("#input-contractId").val();
         $("#contractId-info").html(contractId);
         $("#refund-contractId").html(contractId);
+
+        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
+            return HashedTimelockERC20.getContract(contractId);
+        }).then(function (result) {
+            if (App.account === result[0]) {
+                refundPage.hide();
+            } else if (App.account === result[1]){
+                claimPage.hide();
+            } else {
+                console.log("Not Sender nor Receiver!");
+            }
+            loader.show();
+        })
         return App.timelockProgress();   // for future development
         //return App.testContracts();       deprecated
     },
@@ -182,7 +202,12 @@ App = {
             //to be tested => does this display the right remaining time?
             console.log("DateNow in sec", Math.floor(Date.now() / 1000));
             console.log("timelock in sec",result[6].toNumber());
+            const timelock = result[6].toNumber();
             console.log("remaining", result[6].toNumber() - Math.floor(Date.now() / 1000));
+            const remaining = result[6].toNumber() - Math.floor(Date.now() / 1000);
+            var progressPercent = (Math.ceil(remaining) / timelock) * 100;
+            $('#progress').css('width', progressPercent + '%');
+            $('#remaining-time').html(remaining);
         })
     },
 
