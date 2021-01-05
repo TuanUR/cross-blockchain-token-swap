@@ -17,7 +17,7 @@ This project was conducted during the course of our bachelor studies at the Univ
 ## Setup
 To run this project, install the following dependencies locally:
 1.	npm v6.14.8
-'npm install'
+```npm install```
 2.	hd-wallet-provider
 3.	
 
@@ -33,4 +33,4 @@ To run this project, install the following dependencies locally:
 
 ## Sources 
 This app is inspired by hashed-timelock-contract-ethereum project on GitHub:
-https://github.com/maxisl/hashed-timelock-contract
+https://github.com/chatch/hashed-timelock-contract-ethereum
