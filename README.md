@@ -15,14 +15,19 @@ This project was conducted during the course of our bachelor studies at the Univ
 -	JavaScript
 
 ## Setup
-To run this project, install the following dependencies locally:
-1.	npm v6.14.8
+Fork this repository and cd into it:
+```
+git clone https://github.com/TuanUR/Projektseminar
 
+cd Projektseminar
+```
+To run this project, install the following dependencies locally:
+1.	npm (v6.14.8 or above)
 2.	hd-wallet-provider
-3.	
+3.	openzeppelin contracts
 
 ## Installing
-1.	npm v6.14.8
+1.	npm 
 ```
 npm install
 ```
@@ -36,7 +41,11 @@ npm install @openzeppelin/contracts
 ```
 
 ## Running the tests
+To run the Truffle tests, simply run the command
+```
+truffle test
+```
 
 ## Sources 
-This app is inspired by hashed-timelock-contract-ethereum project on GitHub:
+The code of the HTLC contract was inspired by hashed-timelock-contract-ethereum project on GitHub:
 https://github.com/chatch/hashed-timelock-contract-ethereum
