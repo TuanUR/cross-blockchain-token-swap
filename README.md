@@ -17,17 +17,23 @@ This project was conducted during the course of our bachelor studies at the Univ
 ## Setup
 To run this project, install the following dependencies locally:
 1.	npm v6.14.8
-```npm install```
+
 2.	hd-wallet-provider
 3.	
 
 ## Installing
 1.	npm v6.14.8
-'npm install'
+```
+npm install
+```
 2. truffle-hdwallet-provider
-'npm install truffle-hdwallet-provider'
+```
+npm install truffle-hdwallet-provider
+```
 3. @openzeppelin/contracts
-'install @openzeppelin/contracts'
+```
+npm install @openzeppelin/contracts
+```
 
 ## Running the tests
 
