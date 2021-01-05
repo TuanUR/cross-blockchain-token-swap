@@ -4,7 +4,12 @@ This is a comprehensible swap protocol that enables exchanging assets on and bet
 This project was conducted during the course of our bachelor studies at the University of Regensburg, Germany.
 
 ## Table of contents
-
+* [Technologies](#technologies)
+* [Setup](#setup)
+* [Installing](#installing)
+* [Running the tests](#running-the-tests)
+* [Usage](#usage)
+* [Sources](#sources)
 
 ## Technologies 
 -	Solidity v0.6.0
@@ -31,13 +36,14 @@ To run this project, install the following dependencies locally:
 ```
 npm install
 ```
-2. truffle-hdwallet-provider
-```
-npm install truffle-hdwallet-provider
-```
-3. @openzeppelin/contracts
+2.  @openzeppelin/contracts, containing the necessary token standards for the usage of ERC-20 tokens
 ```
 npm install @openzeppelin/contracts
+```
+3.
+truffle-hdwallet-provider
+```
+npm install truffle-hdwallet-provider
 ```
 
 ## Running the tests
@@ -45,6 +51,9 @@ To run the Truffle tests, simply run the command
 ```
 truffle test
 ```
+
+## Usage 
+TODO
 
 ## Sources 
 The code of the HTLC contract was inspired by hashed-timelock-contract-ethereum project on GitHub:
