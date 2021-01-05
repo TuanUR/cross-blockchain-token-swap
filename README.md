@@ -40,8 +40,7 @@ npm install
 ```
 npm install @openzeppelin/contracts
 ```
-3.
-truffle-hdwallet-provider
+3. truffle-hdwallet-provider
 ```
 npm install truffle-hdwallet-provider
 ```
