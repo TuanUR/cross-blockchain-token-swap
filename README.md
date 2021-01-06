@@ -59,23 +59,28 @@ npm install ethereumjs
 npm install truffle-assertions
 ```
 
-##### ganache 
+#### ganache 
 
-To test the cross chain swap, make sure to launch two ganache blockchains and set one network ID to 8545 and the other 7545
+To test the cross chain swap, make sure to launch two ganache blockchains and set one network ID to 8545 and the other to 7545
 
 To run the truffle test on ganache, run the command for a specific test (at this point truffle does not support running tests in one of the repositories)
 ```
 $ truffle test ./test/ganache/file.js
 ```
 
-##### goerli, rinkeby and ropsten
-To run the tests, aake sure that two of your accounts own two different ERC20 tokens and Ether on each of these test networks. You also need to have an Infura Account and specify in a file named secret.json:
+#### goerli, rinkeby and ropsten
+To run the tests, make sure that two of your accounts own two different ERC20 tokens and Ether on each of these test networks. You also need to have an Infura Account and specify in a file named secret.json:
 
 {
+
     "mnemonic": your mnemonic,
+    
     "infuraApiKey": your infura project id,
+    
     "privateKeyAnna" : your firsrt account private key,
+    
     "privateKeyBen": your second account private key
+    
 }
 
 Run the command for a specific test
