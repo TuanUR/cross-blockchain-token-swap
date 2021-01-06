@@ -74,7 +74,7 @@ To run the tests, make sure that two of your accounts own two different ERC20 to
 {
     "mnemonic": your mnemonic,  
     "infuraApiKey": your infura project id, 
-    "privateKeyAnna" : your firsrt account private key, 
+    "privateKeyAnna" : your first account private key, 
     "privateKeyBen": your second account private key
 }
 ```
