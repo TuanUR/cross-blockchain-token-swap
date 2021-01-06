@@ -70,19 +70,14 @@ $ truffle test ./test/ganache/file.js
 
 #### goerli, rinkeby and ropsten
 To run the tests, make sure that two of your accounts own two different ERC20 tokens and Ether on each of these test networks. You also need to have an Infura Account and specify in a file named secret.json:
-
+```
 {
-
-    "mnemonic": your mnemonic,
-    
-    "infuraApiKey": your infura project id,
-    
-    "privateKeyAnna" : your firsrt account private key,
-    
+    "mnemonic": your mnemonic,  
+    "infuraApiKey": your infura project id, 
+    "privateKeyAnna" : your firsrt account private key, 
     "privateKeyBen": your second account private key
-    
 }
-
+```
 Run the command for a specific test
 ```
 $ truffle test ./test/goerli/file.js
