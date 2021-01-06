@@ -27,9 +27,10 @@ git clone https://github.com/TuanUR/Projektseminar
 cd Projektseminar
 ```
 To run this project, install the following dependencies locally:
-1.	npm (v6.14.8 or above)
-2.	hd-wallet-provider
+1.	npm (v6.14.6 or above)
+2.	truffle (v5.1.53 or above)
 3.	openzeppelin contracts
+4.	hd-wallet-provider
 
 ## Installing
 1.	npm 
@@ -50,12 +51,12 @@ npm install truffle-hdwallet-provider
 ```
 
 ## Running the tests
-To run the truffle test, you need to install the following dependencies
-Install ganache locally https://www.trufflesuite.com/ganache
+To run the truffle test, you need to install the following dependencies locally
+
+Install ganache https://www.trufflesuite.com/ganache
 ```
 npm install ethereumjs 
 npm install truffle-assertions
-npm install truffle-hdwallet-provider
 ```
 
 ##### ganache 
@@ -64,12 +65,18 @@ To test the cross chain swap, make sure to launch two ganache blockchains and se
 
 To run the truffle test on ganache, run the command for a specific test (at this point truffle does not support running tests in one of the repositories)
 ```
-$ truffle test ./test/goerli/file.js
+$ truffle test ./test/ganache/file.js
 ```
 
 ##### goerli, rinkeby and ropsten
+To run the tests, aake sure that two of your accounts own two different ERC20 tokens and Ether on each of these test networks. You also need to have an Infura Account and specify in a file named secret.json:
 
-Make sure that two of your accounts own two different ERC20 tokens and Ether on each of these test networks
+{
+    "mnemonic": your mnemonic,
+    "infuraApiKey": your infura project id,
+    "privateKeyAnna" : your firsrt account private key,
+    "privateKeyBen": your second account private key
+}
 
 Run the command for a specific test
 ```
