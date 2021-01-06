@@ -12,7 +12,7 @@ This project was conducted during the course of our bachelor studies at the Univ
 * [Sources](#sources)
 
 ## Technologies 
--	Solidity v0.6.0
+-	Solidity v0.6.0 
 -	Bootstrap v3.3.7
 -	jQuery v1.12.4
 -	HTML 5
@@ -36,19 +36,44 @@ To run this project, install the following dependencies locally:
 ```
 npm install
 ```
-2.  @openzeppelin/contracts, containing the necessary token standards for the usage of ERC-20 tokens
+2. truffle 
+```
+npm install truffle / npm -i truffle 
+```
+3.  @openzeppelin/contracts, containing the necessary token standards for the usage of ERC-20 tokens
 ```
 npm install @openzeppelin/contracts
 ```
-3. truffle-hdwallet-provider
+4. truffle-hdwallet-provider
 ```
 npm install truffle-hdwallet-provider
 ```
 
 ## Running the tests
-To run the Truffle tests, simply run the command
+To run the truffle test, you need to install the following dependencies
+Install ganache locally https://www.trufflesuite.com/ganache
 ```
-truffle test
+npm install ethereumjs 
+npm install truffle-assertions
+npm install truffle-hdwallet-provider
+```
+
+##### ganache 
+
+To test the cross chain swap, make sure to launch two ganache blockchains and set one network ID to 8545 and the other 7545
+
+To run the truffle test on ganache, run the command for a specific test (at this point truffle does not support running tests in one of the repositories)
+```
+$ truffle test ./test/goerli/file.js
+```
+
+##### goerli, rinkeby and ropsten
+
+Make sure that two of your accounts own two different ERC20 tokens and Ether on each of these test networks
+
+Run the command for a specific test
+```
+$ truffle test ./test/goerli/file.js
 ```
 
 ## Usage 
