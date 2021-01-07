@@ -132,7 +132,18 @@ $ truffle test ./test/ganache/htlc.js --network development
 ```
 
 #### Goerli and Rinkeby (Public Ethereum test blockchains) 
-To run the tests, make sure that you own two accounts and enough Ether to deploy and execute the token swap. One account deploys AnnaERC20 on Goerli and BenERC20 on Rinkeby and then moves all of the BenERC20 to the other account:
+
+Before running the specify these neccessary variables in a file named secret.json:
+```
+{
+    "mnemonic": your mnemonic,  
+    "infuraApiKey": your infura project id, 
+    "privateKeyAnna" : your first account private key, 
+    "privateKeyBen": your second account private key
+}
+```
+
+Also make sure that you own two accounts and enough Ether to deploy and execute the token swap. One account deploys AnnaERC20 on Goerli and BenERC20 on Rinkeby and then moves all of the BenERC20 to the other account:
 ```
 $ truffle migrate --network goerli
 $ truffle migrate --network rinkeby
@@ -153,15 +164,6 @@ truffle(rinkeby)> benerc20.transfer(accounts[1], 100)
 1. Acc: 0 BenERC20 tokens
 2. Acc: 100 BenERC20 tokens
 
-Before running the specify these neccessary variables in a file named secret.json:
-```
-{
-    "mnemonic": your mnemonic,  
-    "infuraApiKey": your infura project id, 
-    "privateKeyAnna" : your first account private key, 
-    "privateKeyBen": your second account private key
-}
-```
 
 Run the command for a specific test
 ```
