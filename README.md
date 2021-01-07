@@ -77,13 +77,13 @@ $ truffle test ./test/ganache/htlc.js --network development
       ✓ setSwap() should fail with a duplicate contract request (449ms)
       ✓ setSwap() should fail when timelock is in the past (618ms)
     claim() test different scenarions:
-      ✓ claim() should send tokens when given the correct secret (899ms)
+      ✓ claim() should send tokens when given the correct secret and emits event correctly (899ms)
       ✓ claim() should fail after claimed swap (145ms)
       ✓ claim() should fail when given the false secret (521ms)
       ✓ claim() should fail if caller is not receiver (129ms)
       ✓ claim() should fail after timelock expiry (5115ms)
     refund() test different secanrios:
-      ✓ refund() should work after timelock expiry (5341ms)
+      ✓ refund() should work after timelock expiry and emits event correctly (5341ms)
       ✓ refund() should fail after refunded swap (127ms)
       ✓ refund() should fail before timelock expiry (548ms)
       ✓ refund() should fail if caller is not sender (133ms)
