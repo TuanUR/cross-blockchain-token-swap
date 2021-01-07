@@ -65,7 +65,64 @@ To test the cross chain swap, make sure to launch two ganache blockchains and se
 
 To run the truffle test on ganache, run the command for a specific test (at this point truffle does not support running tests in one of the repositories)
 ```
-$ truffle test ./test/ganache/file.js
+$ truffle test ./test/ganache/htlc.js --network development
+
+ Contract: HashedTimelockERC20
+    ✓ getSwap() fails when contract doesn't exist (129ms)
+    setSwap() test different scenarios:
+      ✓ setSwap() creates new swap, stores and emits event correctly (992ms)
+      ✓ setSwap() should fail with no approvement (233ms)
+      ✓ setSwap() should fail when zero tokens are approved (1062ms)
+      ✓ setSwap() should fail when approver has no tokens (529ms)
+      ✓ setSwap() should fail with a duplicate contract request (449ms)
+      ✓ setSwap() should fail when timelock is in the past (618ms)
+    claim() test different scenarions:
+      ✓ claim() should send tokens when given the correct secret (899ms)
+      ✓ claim() should fail after claimed swap (145ms)
+      ✓ claim() should fail when given the false secret (521ms)
+      ✓ claim() should fail if caller is not receiver (129ms)
+      ✓ claim() should fail after timelock expiry (5115ms)
+    refund() test different secanrios:
+      ✓ refund() should work after timelock expiry (5341ms)
+      ✓ refund() should fail after refunded swap (127ms)
+      ✓ refund() should fail before timelock expiry (548ms)
+      ✓ refund() should fail if caller is not sender (133ms)
+
+
+  16 passing (19s)
+  
+  $ truffle test ./test/ganache/htlcChain.js --network development
+  
+    Contract: HashedTimelock On Chain Swap between two ERC20 Tokens
+    Test the swap scencario:
+      ✓ 1) Anna initiates a swap with Ben (1005ms)
+      ✓ 2) Ben responds and set ups a swap with Anna (2047ms)
+      ✓ 3) Anna claims the Ben tokens with the secret (1571ms)
+      ✓ 4) Ben claims the Anna tokens after seeing the publicly avaible secret (1276ms)
+    Test the refund scenario:
+      ✓ 1) Anna initiates a swap with Ben (475ms)
+      ✓ 2) Ben responds and set ups a swap with Anna (568ms)
+      ✓ 3) Anna does not claim, so Ben refunds (5sec timeout) (5513ms)
+      ✓ 4) Anna refunds after Ben refunded (339ms)
+
+
+  8 passing (18s)
+  
+  $ truffle test ./test/ganache/htlcChrossChain.js --network development
+  
+    Contract: HashedTimelock Cross Chain Swap between two ERC20 Tokens
+    ✓ Anna and Ben have the right balances on their chain (387ms)
+    Test the swap scencario:
+      ✓ 1) Anna initiates a swap with Ben (560ms)
+      ✓ 2) Ben responds and set ups a swap with Anna (1165ms)
+      ✓ 3) Anna claims the Ben tokens with the secret (712ms)
+      ✓ 4) Ben claims the Anna tokens after seeing the publicly avaible secret (372ms)
+    Test the refund scenario:
+      ✓ Cross chain swap is set up with 5sec timeout on both sides (6855ms)
+
+
+  6 passing (14s)
+  
 ```
 
 #### goerli, rinkeby and ropsten
