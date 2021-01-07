@@ -59,11 +59,17 @@ npm install ethereumjs
 npm install truffle-assertions
 ```
 
-#### ganache 
+#### Ganache (Local Ethereum blockchain)
 
-To test the cross chain swap, make sure to launch two ganache blockchains and set one network ID to 8545 and the other to 7545
+To test the cross chain swap, make sure to launch two ganache blockchains and set one port number to 7545 and the other to 8545:
 
-To run the truffle test on ganache, run the command for a specific test (at this point truffle does not support running tests in one of the repositories)
+RPC SERVER of the first ganache chain
+HTTP://127.0.0.1:7545
+
+RPC SERVER of the second ganache chain
+HTTP://127.0.0.1:8545
+
+To run the truffle test on ganache, run the command for a specific test (at this point truffle does not support running all of the tests in one of the repositories)
 ```
 $ truffle test ./test/ganache/htlc.js --network development
 
@@ -125,8 +131,29 @@ $ truffle test ./test/ganache/htlc.js --network development
   
 ```
 
-#### goerli, rinkeby and ropsten
-To run the tests, make sure that two of your accounts own two different ERC20 tokens and Ether on each of these test networks. You also need to have an Infura Account and specify in a file named secret.json:
+#### Goerli and Rinkeby (Public Ethereum test blockchains) 
+To run the tests, make sure that you own two accounts and enough Ether to deploy and execute the token swap. One account deploys AnnaERC20 on Goerli and BenERC20 on Rinkeby and then moves all of the BenERC20 to the other account:
+```
+$ truffle migrate --network goerli
+$ truffle migrate --network rinkeby
+
+$ truffle console --network rinkeby
+truffle(rinkeby)> benerc20 = await BenERC20.deployed()
+truffle(rinkeby)> accounts = await web3.eth.getAccounts()
+truffle(rinkeby)> benerc20.transfer(accounts[1], 100)
+```
+
+##### Goerli
+
+1. Acc: 100 AnnaERC20 tokens
+2. Acc: 0 AnnaERC20 tokens
+
+##### Rinkeby
+
+1. Acc: 0 BenERC20 tokens
+2. Acc: 100 BenERC20 tokens
+
+Before running the specify these neccessary variables in a file named secret.json:
 ```
 {
     "mnemonic": your mnemonic,  
@@ -135,6 +162,7 @@ To run the tests, make sure that two of your accounts own two different ERC20 to
     "privateKeyBen": your second account private key
 }
 ```
+
 Run the command for a specific test
 ```
 $ truffle test ./test/goerli/file.js
