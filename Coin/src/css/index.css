@@ -47,6 +47,11 @@
     cursor: pointer; /* Mouse pointer on hover */
 }
 
+#interact{
+
+}
+
+
 #homepage:hover {
     background-color: green;
 }
