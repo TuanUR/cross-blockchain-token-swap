@@ -3,6 +3,7 @@ App = {
     web3Provider: null,
     network: null,
     contracts: {},
+    contractAddress: "",
     account: '0x0',
     loading: false,
     tokenPrice: 0, //not needed?
@@ -36,6 +37,22 @@ App = {
         }
         web3 = new Web3(App.web3Provider);
         App.network = web3.version.network;
+        switch (App.network) {
+            case "1":
+                console.log('This is mainnet')
+                break
+            case "2":
+                console.log('This is the ropsten test network.')
+                break
+            case "3":
+                console.log('This is the kovantest network.')
+                break
+            case "4":
+                console.log('This is the rinkeby network.')
+                break
+            default:
+                console.log('This is an unknown network.')
+        }
         return App.renderStartpage();
     },
 
