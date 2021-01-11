@@ -21,7 +21,7 @@
     font-weight: bold;
 }
 
-#contractId-info, #refund-contractId {
+#contractId-info, #refund-contractId, #currentNetwork{
     font-weight: bold;
 }
 

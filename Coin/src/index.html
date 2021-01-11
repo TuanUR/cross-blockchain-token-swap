@@ -29,19 +29,14 @@
             <form onSubmit="App.accessContracts(); return false;" role="form">
                 <div class="form-group">
                     <div class="input-group">
+                        <!--
                         <label for="input-address-htlc">Hashed Timelock Contract Address:</label>
                         <input type="text" id="input-address-htlc" class="form-control input-lg"
                                name="addressHtlc" placeholder="0x0"
                                value="0x4CEE0B8424f67d1473864F0a3640a64460f5FA00"/>
                         </br>
-                        <!--
-                        <label for="input-address-token">Associated ERC20 Contract Address:</label>
-                        <input id="input-address-token" class="form-control input-lg" type="text"
-                               name="addressToken" placeholder="0x0"
-                               value="0xA5A38796Ec3dF359dB128D10f8385bEf6378A741"/>
-                        </br>
                         -->
-                        <label for="input-contractId">Associated swapId (emitted by setSwap() ):</label>
+                        <label for="input-contractId">swapId (emitted by setSwap() ):</label>
                         <input id="input-contractId" class="form-control input-lg" type="text" placeholder="0x0"
                                value="0xb8b8a8d0299c95685bf3d9c86c901c80798a90ba6701abaaee7b3537a9ee6d2b"/>
                         </br>
@@ -57,6 +52,10 @@
         <div id="content" class="text-center" style="display: none;">
             <div id="contract-details">
                 You entered contractId: <span id="contractId-info"></span>
+                <hr>
+            </div>
+            <div id="address-details">
+                You are using the HTLC deployed on address: <span id="contractAddress"></span>
                 <hr>
             </div>
             <!--progress bar to show how much time of timelock has passed?-->

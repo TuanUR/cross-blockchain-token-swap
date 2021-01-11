@@ -37,22 +37,34 @@ App = {
         }
         web3 = new Web3(App.web3Provider);
         App.network = web3.version.network;
+        // Display network name on homepage
         switch (App.network) {
             case "1":
                 console.log('This is mainnet')
-                break
-            case "2":
-                console.log('This is the ropsten test network.')
+                var net_name = "Main"
                 break
             case "3":
-                console.log('This is the kovantest network.')
+                console.log('This is the Ropsten network.')
+                net_name = "Ropsten Testnet"
+                App.contractAddress = "0xe29135e6C6869c296287d6afd381c9ae5E76730F"
                 break
             case "4":
-                console.log('This is the rinkeby network.')
+                console.log('This is the Rinkeby network.')
+                net_name = "Rinkeby Testnet"
+                App.contractAddress = "0x5015529D5674E8Ea79902236bC234c0BFD92dF11"
+                break
+            case "5":
+                console.log('This is the Goerli test network.')
+                net_name = "Goerli Testnet"
+                App.contractAddress = "0x728A89dEF6C372c10b6E111A4A1B6A947fC7B7d6"
                 break
             default:
-                console.log('This is an unknown network.')
+                console.log('Unknown / Private.')
+                net_name = "Unknown / Private"
+                App.contractAddress = "0xc01fE71374ea0C5960f6d1B8cBe2F2E5B2992De0"
         }
+        $('#currentNetwork').html(net_name);
+        console.log(App.contractAddress);
         return App.renderStartpage();
     },
 
@@ -69,8 +81,8 @@ App = {
             App.contracts.HashedTimelockERC20.setProvider(App.web3Provider);
 
             console.log("accessContracts was executed");
-            var input_address_htlc = $('#input-address-htlc').val();
-            App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
+            // var input_address_htlc = $('#input-address-htlc').val(); deprecated
+            App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
                 console.log("HashedTimelock contract address: ", HashedTimelockERC20.address);
             });
             return App.renderHomepage();
@@ -151,8 +163,8 @@ App = {
         $("#contractId-info").html(contractId);
         $("#refund-contractId").html(contractId);
 
-        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
-            return HashedTimelockERC20.getContract(contractId);
+        App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
+            return HashedTimelockERC20.getSwap(contractId);
         }).then(function (result) {
             if (App.account === result[0]) {
                 claimPage.hide();
@@ -173,7 +185,7 @@ App = {
         const secret = $("#secret-claim").val();
         console.log(secret);
         var input_address_htlc = $('#input-address-htlc').val();
-        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
+        App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
             return HashedTimelockERC20.claim(contractId, secret, {
                 from: App.account,
                 gas: 500000 // gas limit
@@ -220,8 +232,8 @@ App = {
         console.log("timelockProgress was executed");
         const contractId = $("#input-contractId").val();
         const input_address_htlc = $('#input-address-htlc').val();
-        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
-            return HashedTimelockERC20.getContract(contractId);
+        App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
+            return HashedTimelockERC20.getSwap(contractId);
         }).then(function (result) {
             //to be tested => does this display the right remaining time?
             console.log("DateNow in sec", Math.floor(Date.now() / 1000));
