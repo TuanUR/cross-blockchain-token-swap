@@ -1,6 +1,7 @@
 App = {
 
     web3Provider: null,
+    network: null,
     contracts: {},
     account: '0x0',
     loading: false,
@@ -34,6 +35,7 @@ App = {
             App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
         }
         web3 = new Web3(App.web3Provider);
+        App.network = web3.version.network;
         return App.renderStartpage();
     },
 
@@ -137,7 +139,7 @@ App = {
         }).then(function (result) {
             if (App.account === result[0]) {
                 claimPage.hide();
-            } else if (App.account === result[1]){
+            } else if (App.account === result[1]) {
                 refundPage.hide();
             } else {
                 console.log("Not Sender nor Receiver!");
@@ -206,7 +208,7 @@ App = {
         }).then(function (result) {
             //to be tested => does this display the right remaining time?
             console.log("DateNow in sec", Math.floor(Date.now() / 1000));
-            console.log("timelock in sec",result[6].toNumber());
+            console.log("timelock in sec", result[6].toNumber());
             const timelock = result[6].toNumber();
             console.log("remaining", result[6].toNumber() - Math.floor(Date.now() / 1000));
             const remaining = result[6].toNumber() - Math.floor(Date.now() / 1000);
