@@ -77,7 +77,6 @@ App = {
             App.contracts.HashedTimelockERC20.setProvider(App.web3Provider);
 
             console.log("accessContracts was executed");
-            // var input_address_htlc = $('#input-address-htlc').val(); deprecated
             App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
                 console.log("HashedTimelock contract address: ", HashedTimelockERC20.address);
             });
@@ -102,7 +101,8 @@ App = {
     },
 
     // for development only - might delete now
-    testContracts: function () {
+    testContracts: function ()
+    {
         console.log("testContracts was executed");
         var input_address_token = $('#input-address-token').val();
         //change Coin address to anna or ben token-address if you want to use them instead of testtoken(TTN)
@@ -154,7 +154,6 @@ App = {
         homepage.show();
         loader.show();
 
-        const input_address_htlc = $('#input-address-htlc').val();
         var swapId = $("#input-swapId").val();
         $("#swapId-info").html(swapId);
         $("#refund-swapId").html(swapId);
@@ -180,7 +179,6 @@ App = {
         const swapId = $("#input-swapId").val();
         const secret = $("#secret-claim").val();
         console.log(secret);
-        var input_address_htlc = $('#input-address-htlc').val();
         App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
             return HashedTimelockERC20.claim(swapId, secret, {
                 from: App.account,
@@ -199,7 +197,6 @@ App = {
     refund: function () {
         console.log("Executed refund function");
         const swapId = $("#input-swapId").val();
-
         console.log(swapId);
         App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
             return HashedTimelockERC20.refund(swapId, {
@@ -210,7 +207,6 @@ App = {
             if (err) {
                 console.log(err)
             } else {
-                alert("refund was successful!");
                 $("form").trigger("reset");
             }
         });
@@ -243,8 +239,7 @@ App = {
     },
 
     testCall: function () {
-        const input_address_htlc = $('#input-address-htlc').val();
-        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
+        App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
             console.log("success");
             //return HashedTimelockERC20.getContract("0x8c8079aa503f69367cb38778f54ac3a6c8f61a4a1d183b96f9381577353e2e79");
         }).then(function (result) {

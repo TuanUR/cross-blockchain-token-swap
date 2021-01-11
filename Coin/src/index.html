@@ -7,6 +7,8 @@
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/index.css" rel="stylesheet">
+    <!-- font awesome for buttons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
 <div class="text-center" id="loader"></div>
@@ -35,7 +37,7 @@
                     <div class="input-group">
                         <label for="input-swapId">swapId (emitted by setSwap() ):</label>
                         <input id="input-swapId" class="form-control input-lg" type="text" placeholder="0x0"
-                               value="0x1526b781816f3d31a77a9e0574fbb93b3380dedecfb418fd9538ae69823ba290"/>
+                               value="0xdfd9e2edf9179fbedab1b0175a36a73485c4bacdab292885868599c62b815057"/>
                         </br>
                         <span class="input-group-btn">
                             <!--implement link to success page with contract details?-->
@@ -48,7 +50,8 @@
         </div>
         <div id="content" class="text-center" style="display: none;">
             <div id="contract-details">
-                You entered swapId: <span id="swapId-info"></span>
+                You entered swapId: <br/>
+                <span id="swapId-info"></span>
                 <hr>
             </div>
             <!-- TODO progress bar to show how much time of timelock has passed?-->
@@ -85,6 +88,9 @@
                     </form>
                 </div>
                 <hr>
+                <div>
+                    <button id="homepage" class="btn" onClick="location.reload();"><i class="fa fa-home"></i></button>
+                </div>
             </div>
         </div>
     </div>
