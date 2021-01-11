@@ -37,34 +37,30 @@ App = {
         }
         web3 = new Web3(App.web3Provider);
         App.network = web3.version.network;
-        // Display network name on homepage
+        // detect network
         switch (App.network) {
             case "1":
-                console.log('This is mainnet')
                 var net_name = "Main"
                 break
             case "3":
-                console.log('This is the Ropsten network.')
                 net_name = "Ropsten Testnet"
                 App.contractAddress = "0xe29135e6C6869c296287d6afd381c9ae5E76730F"
                 break
             case "4":
-                console.log('This is the Rinkeby network.')
                 net_name = "Rinkeby Testnet"
                 App.contractAddress = "0x5015529D5674E8Ea79902236bC234c0BFD92dF11"
                 break
             case "5":
-                console.log('This is the Goerli test network.')
                 net_name = "Goerli Testnet"
                 App.contractAddress = "0x728A89dEF6C372c10b6E111A4A1B6A947fC7B7d6"
                 break
             default:
-                console.log('Unknown / Private.')
                 net_name = "Unknown / Private"
                 App.contractAddress = "0xc01fE71374ea0C5960f6d1B8cBe2F2E5B2992De0"
         }
+        // display current network and htlc details on homepage
         $('#currentNetwork').html(net_name);
-        console.log(App.contractAddress);
+        $('#contractAddress').html(App.contractAddress);
         return App.renderStartpage();
     },
 

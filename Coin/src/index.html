@@ -9,7 +9,7 @@
     <link href="css/index.css" rel="stylesheet">
 </head>
 <body>
-<div class="text-center" id="loader" ></div>
+<div class="text-center" id="loader"></div>
 <div id="all-content" class="container" style="width: 650px;">
     <div class="row">
         <div class="col-lg-12">
@@ -20,6 +20,10 @@
                 <p>You are signed in with account : <span id="accountAddress"></span>
                 </p>
                 <p>You are on network: <span id="currentNetwork"></span>
+                </p>
+                <p id="address-details">
+                    You are using the HTLC deployed at address: <span id="contractAddress"></span>
+                <hr>
                 </p>
             </div>
             <br/>
@@ -38,7 +42,7 @@
                         -->
                         <label for="input-contractId">swapId (emitted by setSwap() ):</label>
                         <input id="input-contractId" class="form-control input-lg" type="text" placeholder="0x0"
-                               value="0xb8b8a8d0299c95685bf3d9c86c901c80798a90ba6701abaaee7b3537a9ee6d2b"/>
+                               value="0x1526b781816f3d31a77a9e0574fbb93b3380dedecfb418fd9538ae69823ba290"/>
                         </br>
                         <span class="input-group-btn">
                             <!--implement link to success page with contract details?-->
@@ -54,14 +58,10 @@
                 You entered contractId: <span id="contractId-info"></span>
                 <hr>
             </div>
-            <div id="address-details">
-                You are using the HTLC deployed on address: <span id="contractAddress"></span>
-                <hr>
-            </div>
             <!--progress bar to show how much time of timelock has passed?-->
             <div class="text-center">
                 <h3>Timelock progress</h3>
-                <p>Remaining Time:
+                <p>Remaining time (seconds):
                     <span id="remaining-time"></span>
                 </p>
                 <div class="progress">

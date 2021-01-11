@@ -8,7 +8,7 @@
     color: green;
 }
 
-#token-totalSupply {
+#token-totalSupply, #remaining-time {
     font-weight: bold;
     color: red;
 }
@@ -17,11 +17,7 @@
     display: none;
 }
 
-#accountAddress {
-    font-weight: bold;
-}
-
-#contractId-info, #refund-contractId, #currentNetwork{
+#contractId-info, #refund-contractId, #currentNetwork, #accountAddress, #contractAddress{
     font-weight: bold;
 }
 
