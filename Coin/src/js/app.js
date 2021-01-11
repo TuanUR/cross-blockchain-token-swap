@@ -155,12 +155,12 @@ App = {
         loader.show();
 
         const input_address_htlc = $('#input-address-htlc').val();
-        var contractId = $("#input-contractId").val();
-        $("#contractId-info").html(contractId);
-        $("#refund-contractId").html(contractId);
+        var swapId = $("#input-swapId").val();
+        $("#swapId-info").html(swapId);
+        $("#refund-swapId").html(swapId);
 
         App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
-            return HashedTimelockERC20.getSwap(contractId);
+            return HashedTimelockERC20.getSwap(swapId);
         }).then(function (result) {
             if (App.account === result[0]) {
                 claimPage.hide();
@@ -177,12 +177,12 @@ App = {
 
     claim: function () {
         console.log("Executed claim function");
-        const contractId = $("#input-contractId").val();
+        const swapId = $("#input-swapId").val();
         const secret = $("#secret-claim").val();
         console.log(secret);
         var input_address_htlc = $('#input-address-htlc').val();
         App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
-            return HashedTimelockERC20.claim(contractId, secret, {
+            return HashedTimelockERC20.claim(swapId, secret, {
                 from: App.account,
                 gas: 500000 // gas limit
             });
@@ -198,11 +198,11 @@ App = {
 
     refund: function () {
         console.log("Executed refund function");
-        const contractId = $("#input-contractId").val();
-        const input_address_htlc = $('#input-address-htlc').val();
-        console.log(contractId);
-        App.contracts.HashedTimelockERC20.at(input_address_htlc).then(function (HashedTimelockERC20) {
-            return HashedTimelockERC20.refund(contractId, {
+        const swapId = $("#input-swapId").val();
+
+        console.log(swapId);
+        App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
+            return HashedTimelockERC20.refund(swapId, {
                 from: App.account,
                 gas: 500000
             });
@@ -226,14 +226,13 @@ App = {
 
     timelockProgress: function () {
         console.log("timelockProgress was executed");
-        const contractId = $("#input-contractId").val();
-        const input_address_htlc = $('#input-address-htlc').val();
+        const swapId = $("#input-swapId").val();
         App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
-            return HashedTimelockERC20.getSwap(contractId);
+            return HashedTimelockERC20.getSwap(swapId);
         }).then(function (result) {
             //to be tested => does this display the right remaining time?
-            console.log("DateNow in sec", Math.floor(Date.now() / 1000));
-            console.log("timelock in sec", result[6].toNumber());
+            //console.log("DateNow in sec", Math.floor(Date.now() / 1000));
+            // console.log("timelock in sec", result[6].toNumber());
             const timelock = result[6].toNumber();
             console.log("remaining", result[6].toNumber() - Math.floor(Date.now() / 1000));
             const remaining = result[6].toNumber() - Math.floor(Date.now() / 1000);

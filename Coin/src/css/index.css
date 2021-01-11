@@ -17,7 +17,7 @@
     display: none;
 }
 
-#contractId-info, #refund-contractId, #currentNetwork, #accountAddress, #contractAddress{
+#swapId, #refund-swapId, #currentNetwork, #accountAddress, #contractAddress{
     font-weight: bold;
 }
 
