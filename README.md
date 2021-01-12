@@ -143,6 +143,37 @@ Before running the specify these neccessary variables in a file named secret.jso
 }
 ```
 
+First deploy the ERC20 token contract Coin in the contracts folder. Then you can run this test: 
+
+```
+$ truffle test ./test/goerli/htlc.js --network goerli
+
+  Contract: HashedTimelockERC20 on Test Network Goerli
+    ✓ getSwap() fails when swap doesn't exist (1225ms)
+    setSwap() test different scenarios:
+      ✓ setSwap() creates new swap, stores and emits event correctly (56617ms)
+      ✓ setSwap() should fail with no approvement (25310ms)
+      ✓ setSwap() should fail when zero tokens are approved (45531ms)
+      ✓ setSwap() should fail when approver has no tokens (55508ms)
+      ✓ setSwap() should fail with a duplicate swap request (57997ms)
+      ✓ setSwap() should fail when timelock is in the past (41863ms)
+    claim() test different scenarions:
+      ✓ claim() should send tokens when given the correct secret and emits event correctly (30463ms)
+      ✓ claim() should fail after claimed swap (25361ms)
+      ✓ claim() should fail when given the false secret (75686ms)
+      ✓ claim() should fail if caller is not receiver (15072ms)
+      ✓ claim() should fail after timelock expiry (61874ms)
+    refund() test different secanrios:
+      ✓ refund() should work after timelock expiry and emits event correctly (45405ms)
+      ✓ refund() should fail after refunded swap (27031ms)
+      ✓ refund() should fail before timelock expiry (49914ms)
+      ✓ refund() should fail if caller is not sender (23084ms)
+      ✓ refund() should work after timelock expiry (needed due to a newSwap) (100192ms)
+
+
+  17 passing (14m)
+```
+
 Also make sure that you own two accounts and enough Ether to deploy and execute the token swap. One account deploys AnnaERC20 on Goerli and BenERC20 on Rinkeby and then moves all of the BenERC20 to the other account:
 ```
 $ truffle migrate --network goerli
