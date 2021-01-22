@@ -251,6 +251,23 @@ Anna rinkeby: 5
   15 passing (4m)
 ```
 
+## Refund Guide (in the case of an expiry of the timelock or an test error)
+
+Depending on the network you have to do the these steps in order to get the tokens locked in the HTLC back. Keep in mind that the time limit on the swap in the HTLC has to have passed and that only the swap receiver is able to redeem the tokens with the corresponding swapId. 
+
+The HTLC addresses are as follows:
+
+##### Goerli network: 0x728A89dEF6C372c10b6E111A4A1B6A947fC7B7d6
+##### Rinkeby network: 0x5015529D5674E8Ea79902236bC234c0BFD92dF11
+##### Ropsten network: 0xe29135e6C6869c296287d6afd381c9ae5E76730F
+
+```
+$ truffle console --network goerli
+
+truffle(goerli)> htlc = await HashedTimelockERC20.at("0x728A89dEF6C372c10b6E111A4A1B6A947fC7B7d6")
+truffle(goerli)> htlc.refund("swapId")
+```
+
 ## Usage 
 TODO
 
