@@ -185,12 +185,12 @@ truffle(rinkeby)> accounts = await web3.eth.getAccounts()
 truffle(rinkeby)> benerc20.transfer(accounts[1], 100)
 ```
 
-##### Goerli
+**Goerli**
 
 1. Acc: 100 AnnaERC20 tokens
 2. Acc: 0 AnnaERC20 tokens
 
-##### Rinkeby
+**Rinkeby**
 
 1. Acc: 0 BenERC20 tokens
 2. Acc: 100 BenERC20 tokens
@@ -251,21 +251,26 @@ Anna rinkeby: 5
   15 passing (4m)
 ```
 
-## Refund Guide (in the case of an expiry of the timelock or an test error)
+## Refund Guide
 
-Depending on the network you have to do the these steps in order to get the tokens locked in the HTLC back. Keep in mind that the time limit on the swap in the HTLC has to have passed and that only the swap receiver is able to redeem the tokens with the corresponding swapId. 
+If the tokens in your created swap weren't claimed prior to the expiry or one of the tests exited with an error on the public testnetworks, then you have to do certain steps to get the tokens locked in the HTLC back, which otherwise would stuck there. 
+
+In order to refund keep in mind that the time limit on the swap in the HTLC has to have passed and that the swap receiver is specified as the caller of the refund function with the corresponding swapId. In the cross-chain test the swapId is displayed so that you can redeem your tokens from the HTLC in the case of an error. However, the swapId is not always displayed, which is why we include the steps for obtaining your swapId below.
 
 The HTLC addresses are as follows:
 
-##### Goerli network: 0x728A89dEF6C372c10b6E111A4A1B6A947fC7B7d6
-##### Rinkeby network: 0x5015529D5674E8Ea79902236bC234c0BFD92dF11
-##### Ropsten network: 0xe29135e6C6869c296287d6afd381c9ae5E76730F
+**Goerli network: 0x728A89dEF6C372c10b6E111A4A1B6A947fC7B7d6**
+**Rinkeby network: 0x5015529D5674E8Ea79902236bC234c0BFD92dF11**
+**Ropsten network: 0xe29135e6C6869c296287d6afd381c9ae5E76730F**
+
+An exemplary refund on Goerli will be shown: 
 
 ```
 $ truffle console --network goerli
 
 truffle(goerli)> htlc = await HashedTimelockERC20.at("0x728A89dEF6C372c10b6E111A4A1B6A947fC7B7d6")
-truffle(goerli)> htlc.refund("swapId")
+truffle(goerli)> await h.getPastEvents("newSwap", { fromBlock: 0, toBlock: 'latest' }) 
+truffle(goerli)> htlc.refund("yourSwapId", {from: "receiver.address"})
 ```
 
 ## Usage 
