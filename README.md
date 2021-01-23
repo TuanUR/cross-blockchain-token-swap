@@ -3,8 +3,8 @@ This is a comprehensible swap protocol that enables exchanging assets on and bet
 
 The HTLCs are already deployed on the public testnetworks Goerli, Rinkeby and Ropsten with the following contract addresses:
 
-**Goerli network: 0x728A89dEF6C372c10b6E111A4A1B6A947fC7B7d6**
-**Rinkeby network: 0x5015529D5674E8Ea79902236bC234c0BFD92dF11**
+**Goerli network: 0x728A89dEF6C372c10b6E111A4A1B6A947fC7B7d6** <br />
+**Rinkeby network: 0x5015529D5674E8Ea79902236bC234c0BFD92dF11** <br />
 **Ropsten network: 0xe29135e6C6869c296287d6afd381c9ae5E76730F**
 
 
@@ -80,18 +80,17 @@ npm install truffle-assertions
 
 #### Ganache (Local Ethereum Blockchain)
 
-To test the cross chain swap, make sure to launch two ganache blockchains and set one port number to **7545** and the other to **8545**:
+To test the cross chain swap, make sure to launch **two ganache blockchains** (double-click on the icon in Windows 10) and set one port number to **7545** and the other to **8545**:
 
-RPC SERVER of the first ganache chain
-HTTP://127.0.0.1:7545
+RPC SERVER of the *first* ganache chain: HTTP://127.0.0.1:7545
+RPC SERVER of the *second* ganache chain: HTTP://127.0.0.1:8545
 
-RPC SERVER of the second ganache chain
-HTTP://127.0.0.1:8545
-
-To run the truffle test on ganache, run the command for a specific test (at this point truffle does not support running all of the tests in the folder)
+To run the truffle test on ganache, run the following commands for a specific test (at this point truffle does not support running all of the tests in the folder):
 ```
 $ truffle test ./test/ganache/htlc.js --network development
-
+```
+End result:
+```
  Contract: HashedTimelockERC20
     ✓ getSwap() fails when contract doesn't exist (129ms)
     setSwap() test different scenarios:
@@ -115,9 +114,13 @@ $ truffle test ./test/ganache/htlc.js --network development
 
 
   16 passing (19s)
-  
+```
+ 
+```
   $ truffle test ./test/ganache/htlcChain.js --network development
-  
+```
+End result:
+```
     Contract: HashedTimelock On Chain Swap between two ERC20 Tokens
     Test the swap scencario:
       ✓ 1) Anna initiates a swap with Ben (1005ms)
@@ -132,7 +135,9 @@ $ truffle test ./test/ganache/htlc.js --network development
 
 
   8 passing (18s)
-  
+```
+End result:
+```
   $ truffle test ./test/ganache/htlcChrossChain.js --network development
   
     Contract: HashedTimelock Cross Chain Swap between two ERC20 Tokens
@@ -169,7 +174,7 @@ Add ```secret.json``` with the corresponding values for the hd-wallet-provider a
 
 ##### Prerequisites
 
-Deploy the ERC-20 token contracts ```Coin.sol``` together with ```AnnaERC20.sol``` on **Goerl** and ```BenERC20.sol``` on **Rinkeby** in the contracts folder. Note that you should comment the specific ```deployer.deploy(contract.sol)``` out before launching these contracts on the network. Additionally, after deploying the ```BenERC20.sol``` move all of the tokens from the contract to the other account: 
+Deploy the ERC-20 token contracts ```Coin.sol``` together with ```AnnaERC20.sol``` on **Goerli** and ```BenERC20.sol``` on **Rinkeby** in the contracts folder. Note that you should comment the specific ```deployer.deploy(contract.sol)``` out before launching these contracts on the network. Additionally, after deploying the ```BenERC20.sol``` move all of the tokens from the contract to the other account: 
 
 ```
 $ truffle migrate --network goerli
