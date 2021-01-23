@@ -15,8 +15,8 @@ This project was conducted during the course of our bachelor studies at the Univ
 <!-- Table of Contents -->
 ## Table of Contents
 * [Technologies](#technologies)
-* [Project Setup](#setup)
-* [Run the tests](#running-the-tests)
+* [Project Setup](#project-setup)
+* [Run the Tests](#run-the-tests)
 * [Usage](#usage)
 * [Sources](#sources)
 
@@ -82,7 +82,7 @@ npm install truffle-assertions
 
 To test the cross chain swap, make sure to launch **two ganache blockchains** (double-click on the icon in Windows 10) and set one port number to **7545** and the other to **8545**:
 
-RPC SERVER of the *first* ganache chain: HTTP://127.0.0.1:7545
+RPC SERVER of the *first* ganache chain: HTTP://127.0.0.1:7545 <br />
 RPC SERVER of the *second* ganache chain: HTTP://127.0.0.1:8545
 
 To run the truffle test on ganache, run the following commands for a specific test (at this point truffle does not support running all of the tests in the folder).
