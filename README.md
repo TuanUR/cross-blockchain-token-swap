@@ -85,7 +85,9 @@ To test the cross chain swap, make sure to launch **two ganache blockchains** (d
 RPC SERVER of the *first* ganache chain: HTTP://127.0.0.1:7545
 RPC SERVER of the *second* ganache chain: HTTP://127.0.0.1:8545
 
-To run the truffle test on ganache, run the following commands for a specific test (at this point truffle does not support running all of the tests in the folder):
+To run the truffle test on ganache, run the following commands for a specific test (at this point truffle does not support running all of the tests in the folder).
+
+Command for HTLC test:
 ```
 $ truffle test ./test/ganache/htlc.js --network development
 ```
@@ -115,7 +117,7 @@ End result:
 
   16 passing (19s)
 ```
- 
+Command for on-chain token swap test:
 ```
   $ truffle test ./test/ganache/htlcChain.js --network development
 ```
@@ -136,10 +138,12 @@ End result:
 
   8 passing (18s)
 ```
-End result:
+Command for cross-chain token swap test:
 ```
   $ truffle test ./test/ganache/htlcChrossChain.js --network development
-  
+```
+End result:
+```
     Contract: HashedTimelock Cross Chain Swap between two ERC20 Tokens
     ✓ Anna and Ben have the right balances on their chain (387ms)
     Test the swap scencario:
