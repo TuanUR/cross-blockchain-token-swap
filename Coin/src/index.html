@@ -7,16 +7,26 @@
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/index.css" rel="stylesheet">
+    <!-- font awesome for buttons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://use.fontawesome.com/b073a94b71.js"></script>
 </head>
 <body>
-<div class="container" style="width: 650px;">
+<div class="text-center" id="loader"></div>
+<div id="all-content" class="container" style="width: 650px;">
     <div class="row">
         <div class="col-lg-12">
-            <h1 class="text-center">Cross Chain Token Swap</h1>
+            <h1 class="text-center">Cross-Blockchain Token Swap</h1>
             <br/>
             <div class="introduction text-center">
-                <p class="welcome">Welcome to the Hash Timelocked Cross-Chain Token-Swap (HTLC)</p>
+                <p class="welcome">Welcome to the Hashed Timelock Cross-Blockchain Token-Swap (HTLC)</p>
                 <p>You are signed in with account : <span id="accountAddress"></span>
+                </p>
+                <p>You are on network: <span id="currentNetwork"></span>
+                </p>
+                <p id="address-details">
+                    You are using the HTLC deployed at address: <span id="contractAddress"></span>
+                <hr>
                 </p>
             </div>
             <br/>
@@ -26,36 +36,37 @@
             <form onSubmit="App.accessContracts(); return false;" role="form">
                 <div class="form-group">
                     <div class="input-group">
-                        <label for="input-address-htlc">Hashed Timelock Contract Address:</label>
-                        <input type="text" id="input-address-htlc" class="form-control input-lg"
-                               name="addressHtlc" placeholder="0x0" value="0x82FfC531DC72C22D39B00B6fb17BfD0a38b774c7"/>
-                        </br>
-                        <label for="input-address-token">Associated ERC20 Contract Address:</label>
-                        <input id="input-address-token" class="form-control input-lg" type="text"
-                               name="addressToken" placeholder="0x0"
-                               value="0x3f543AAC9B7b905A12b8a827DDD0F7898b279387"/>
-                        </br>
-                        <label for="input-contractId">Associated ContractId (emitted by setSwap() ):</label>
-                        <input id="input-contractId" class="form-control input-lg" type="text" placeholder="0x0"
-                               value="0xbd541dc313f86aa5e1c45ee35aa8f0f948263078fa0d57e68678324241a45af3"/>
-                        </br>
-                        <span class="input-group-btn">
+                        <label for="input-swapId">swapId (emitted by setSwap function):</label>
+                        <input id="input-swapId" class="form-control input-lg" type="text" placeholder="0x0"
+                               value="0xdfd9e2edf9179fbedab1b0175a36a73485c4bacdab292885868599c62b815057"/>
+                        <span class="input-group-btn" >
                             <!--implement link to success page with contract details?-->
-                            <button type="submit" class="btn btn-success btn-lg">Interact with your contract</button>
+                            <button id="interact" type="submit" class="btn"><i class="fa fa-check-circle"></i></button>
                         </span>
+
                     </div>
                 </div>
             </form>
         </div>
         <div id="content" class="text-center" style="display: none;">
             <div id="contract-details">
-                You entered contractId: <span id="contractId-info"></span>
+                You entered swapId: <br/>
+                <span id="swapId-info"></span>
+                <hr>
             </div>
-            <!--progress bar to show how much time of timelock has passed?-->
-            <div class="progress">
-                <div id="progress" class="progress-bar progress-bar-striped-active"
-                     aria-valuemin="0" aria-valuemax="100">
+            <!-- TODO progress bar to show how much time of timelock has passed?-->
+            <div class="text-center">
+                <h3>Timelock progress</h3>
+                <p>Remaining time (seconds):
+                    <span id="remaining-time"></span>
+                </p>
+                <!--
+                <div class="progress">
+                    <div id="progress" class="progress-bar progress-bar-striped-active"
+                         aria-valuemin="0" aria-valuemax="100">
+                    </div>
                 </div>
+                -->
             </div>
             <div class="contract-actions">
                 <div id="claim">
@@ -71,12 +82,15 @@
                 <div id="refund">
                     <hr>
                     <form onSubmit="App.refund(); return false;" role="form">
-                        <h3>Verify your contractId and hit "Refund" to refund your funds</h3>
-                        <p>You entered contractId: <span id="refund-contractId"></span></p>
+                        <h3>Verify your swapId and hit "Refund" to refund your funds</h3>
+                        <p>You entered swapId: <span id="refund-swapId"></span></p>
                         <button type="submit" class="btn btn-success btn-lg">Refund</button>
                     </form>
                 </div>
                 <hr>
+                <div>
+                    <button id="homepage" class="btn" onClick="location.reload();"><i class="fa fa-home"></i></button>
+                </div>
             </div>
         </div>
     </div>
