@@ -17,7 +17,7 @@ This project was conducted during the course of our bachelor studies at the Univ
 * [Technologies](#technologies)
 * [Project Setup](#project-setup)
 * [Run the Tests](#run-the-tests)
-* [Usage](#usage)
+* [Using the DApp](#using-the-dapp)
 * [Sources](#sources)
 
 
@@ -319,7 +319,7 @@ truffle(goerli)> htlc.refund("yourSwapId", {from: "receiver.address"})
 
 
 <!-- Usage -->
-## Usage 
+## Using the DApp
 TODO
 
 
