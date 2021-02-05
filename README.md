@@ -320,7 +320,23 @@ truffle(goerli)> htlc.refund("yourSwapId", {from: "receiver.address"})
 
 <!-- Usage -->
 ## Using the DApp
-TODO
+The decentralized application enables users to interact with their existing swaps. It therefore requires an already set up swap as well as it's swapId (either emitted by newSwap Event or transmitted to the user by someone else). 
+Users have the ability to inspect swap details as well as to easily execute the core functions claim() and refund() of the protocol without the need of using the command-line.
+
+### 1. Startpage
+
+The startpage of the interface displays relevant information, which includes the user's accounts address, the network he is currently on and the address of the HTLC the DApp is executing. 
+Please note that if you're using a private network, you should add the contract address of your own HTLC in the source code. The same applies if you want to abstain from using the provided HTLCs at the previously mentioned addresses.
+
+The user can enter the swapId of the swap he wants to interact with in the dedicated input field to move on to the main page of the interface.
+After hitting the check button, the app will check if the user is either the sender or receiver of the swap (as specified in the swap struct) during the forwarding process. An according main page of the interface will be then shown:
+
+### 2. Main page
+
+#### i.) if user is receiver (ability to claim)
+
+#### ii.) if user is sender (ability to refund)
+
 
 
 
