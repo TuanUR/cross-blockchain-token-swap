@@ -337,6 +337,8 @@ After hitting the check button, the app will check if the user is either the sen
 
 #### i.) if user is receiver (ability to claim)
 
+![Bildschirmfoto 2021-02-05 um 16 40 41](https://user-images.githubusercontent.com/64489139/107055978-2666da80-67d2-11eb-8b88-2140a5625a19.png)
+
 #### ii.) if user is sender (ability to refund)
 
 ![Bildschirmfoto 2021-02-05 um 16 41 13](https://user-images.githubusercontent.com/64489139/107055833-fc151d00-67d1-11eb-9b44-f7c26b66dcde.png)
