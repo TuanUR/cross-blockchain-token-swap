@@ -347,7 +347,7 @@ The user can now enter the plaintext secret for the swap. By doing so and hittin
 #### ii.) if user is sender (ability to refund)
 The user can hit "Refund" to refund his deposited funds. Similarly to case i.), a pop-up window will appear with all the transaction details. By confirming the pop-up, the transaction gets executed and the user gets his funds that have been locked in the swap back.
 
-![Bildschirmfoto 2021-02-05 um 16 41 13](https://user-images.githubusercontent.com/64489139/107055833-fc151d00-67d1-11eb-9b44-f7c26b66dcde.png)
+![Bildschirmfoto 2021-02-05 um 16 57 07](https://user-images.githubusercontent.com/64489139/107057021-434fdd80-67d3-11eb-96c5-e33f2b908dc3.png)
 
 
 
