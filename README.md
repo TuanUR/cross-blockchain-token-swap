@@ -328,6 +328,8 @@ Users have the ability to inspect swap details as well as to easily execute the 
 The startpage of the interface displays relevant information, which includes the user's accounts address, the network he is currently on and the address of the HTLC the DApp is executing. 
 Please note that if you're using a private network, you should add the contract address of your own HTLC in the source code. The same applies if you want to abstain from using the provided HTLCs at the previously mentioned addresses.
 
+![Bildschirmfoto 2021-02-05 um 16 40 02](https://user-images.githubusercontent.com/64489139/107055186-4f3aa000-67d1-11eb-85c5-2b66e3f4b8e2.png)
+
 The user can enter the swapId of the swap he wants to interact with in the dedicated input field to move on to the main page of the interface.
 After hitting the check button, the app will check if the user is either the sender or receiver of the swap (as specified in the swap struct) during the forwarding process. An according main page of the interface will be then shown:
 
