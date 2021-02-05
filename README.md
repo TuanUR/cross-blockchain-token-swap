@@ -334,12 +334,18 @@ The user can enter the swapId of the swap he wants to interact with in the dedic
 After hitting the check button, the app will check if the user is either the sender or receiver of the swap (as specified in the swap struct) during the forwarding process. An according main page of the interface will be then shown:
 
 ### 2. Main page
+The main page displays the general information from the previous page as well as 
+- the swapId entered by the user
+- the timelock progress (= remaining time of timelock in seconds)
+- either possibility to claim or to refund
 
 #### i.) if user is receiver (ability to claim)
+The user can now enter the plaintext secret for the swap. By doing so and hitting "Claim", a pop-up window will appear with all the transaction details. By confirming the pop-up, the transaction gets executed and the user gets the funds that have been locked in the swap.
 
 ![Bildschirmfoto 2021-02-05 um 16 40 41](https://user-images.githubusercontent.com/64489139/107055978-2666da80-67d2-11eb-8b88-2140a5625a19.png)
 
 #### ii.) if user is sender (ability to refund)
+The user can hit "Refund" to refund his deposited funds. Similarly to case i.), a pop-up window will appear with all the transaction details. By confirming the pop-up, the transaction gets executed and the user gets his funds that have been locked in the swap back.
 
 ![Bildschirmfoto 2021-02-05 um 16 41 13](https://user-images.githubusercontent.com/64489139/107055833-fc151d00-67d1-11eb-9b44-f7c26b66dcde.png)
 
