@@ -61,8 +61,6 @@ npm install truffle-hdwallet-provider
 <!-- Interface -->
 ## HTLC Interface
 
-**HashedTimelockERC20**
-
 1. ```newSwap(receiver, tokenContract, hashlock, timelock, tokenAmount)``` create a new swap with receiver address, ERC20 token contract address, hashlock, expiry, and number of tokens <br />
 2. ```claim(swapId, seceret)``` receiver can claim tokens by revealing the secret prior to the expiry of the time limit <br />
 3. ```refund(swapId)``` sender can refund tokens by calling this method after the expiry of the time limit <br />
