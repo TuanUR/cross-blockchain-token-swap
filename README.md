@@ -61,15 +61,17 @@ npm install truffle-hdwallet-provider
 <!-- Interface -->
 ## HTLC Interface
 
+**HashedTimelockERC20**
+
 1. ```newSwap(receiver, tokenContract, hashlock, timelock, tokenAmount)``` create a new swap with receiver address, ERC20 token contract address, hashlock, expiry, and number of tokens <br />
 2. ```claim(swapId, seceret)``` receiver can claim tokens by revealing the secret prior to the expiry of the time limit <br />
 3. ```refund(swapId)``` sender can refund tokens by calling this method after the expiry of the time limit <br />
 
 The HTLCs are already deployed on the public testnetworks Goerli, Rinkeby and Ropsten with the following contract addresses:
 
-**Goerli network: 0x728A89dEF6C372c10b6E111A4A1B6A947fC7B7d6** <br />
-**Rinkeby network: 0x5015529D5674E8Ea79902236bC234c0BFD92dF11** <br />
-**Ropsten network: 0xe29135e6C6869c296287d6afd381c9ae5E76730F**
+- **Goerli network: 0x728A89dEF6C372c10b6E111A4A1B6A947fC7B7d6** <br />
+- **Rinkeby network: 0x5015529D5674E8Ea79902236bC234c0BFD92dF11** <br />
+- **Ropsten network: 0xe29135e6C6869c296287d6afd381c9ae5E76730F**
 
 
 
