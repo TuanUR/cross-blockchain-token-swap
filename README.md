@@ -1,13 +1,6 @@
 # Cross-Blockchain Token-Swap with Ethereum
 This is a comprehensible swap protocol that enables exchanging assets on and between different blockchains on the Ethereum network with the help of Hashed Timelock Contracts (HTLC).
 
-The HTLCs are already deployed on the public testnetworks Goerli, Rinkeby and Ropsten with the following contract addresses:
-
-**Goerli network: 0x728A89dEF6C372c10b6E111A4A1B6A947fC7B7d6** <br />
-**Rinkeby network: 0x5015529D5674E8Ea79902236bC234c0BFD92dF11** <br />
-**Ropsten network: 0xe29135e6C6869c296287d6afd381c9ae5E76730F**
-
-
 This project was conducted during the course of our bachelor studies at the University of Regensburg, Germany.
 
 
@@ -16,10 +9,10 @@ This project was conducted during the course of our bachelor studies at the Univ
 ## Table of Contents
 * [Technologies](#technologies)
 * [Project Setup](#project-setup)
+* [HTLC Interface](#htlc-interface)
 * [Run the Tests](#run-the-tests)
 * [Using the DApp](#using-the-dapp)
 * [Sources](#sources)
-
 
 
 
@@ -63,6 +56,22 @@ npm install @openzeppelin/contracts
 ```
 npm install truffle-hdwallet-provider
 ```
+
+
+<!-- Interface -->
+## Interface
+
+***HashedTimelockERC20**
+
+```newSwap(receiver, tokenContract, hashlock, timelock, tokenAmount)``` create a new swap with receiver address, ERC20 token contract address, hashlock, expiry, and number of tokens
+```claim(swapId, seceret)``` receiver can claim tokens by revealing the secret prior to the expiry of the time limit
+```refund(swapId)``` sender can refund tokens by calling this method after the expiry of the time limit
+
+The HTLCs are already deployed on the public testnetworks Goerli, Rinkeby and Ropsten with the following contract addresses:
+
+**Goerli network: 0x728A89dEF6C372c10b6E111A4A1B6A947fC7B7d6** <br />
+**Rinkeby network: 0x5015529D5674E8Ea79902236bC234c0BFD92dF11** <br />
+**Ropsten network: 0xe29135e6C6869c296287d6afd381c9ae5E76730F**
 
 
 
