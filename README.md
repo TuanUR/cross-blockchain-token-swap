@@ -1,5 +1,6 @@
 # Cross-Blockchain Token-Swap with Ethereum
 This project proposes an atomic swap protocol that can be summarized as follows:
+
 it enables an
 - exchange of two different kinds of funds (e.g. tokens) 
 - with another (unfamiliar) party
