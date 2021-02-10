@@ -1,8 +1,14 @@
 # Cross-Blockchain Token-Swap with Ethereum
-This is a comprehensible swap protocol that enables exchanging assets on and between different blockchains on the Ethereum network with the help of Hashed Timelock Contracts (HTLC).
+This project proposes an atomic swap protocol that can be summarized as follows:
+it enables an
+- exchange of two different kinds of funds (e.g. tokens) 
+- with another (unfamiliar) party
+- that possibly is on another blockchain
+- following a traceable and comprehensible procedure 
+- without the need for a trusted third party
+
 
 This project was conducted during the course of our bachelor studies at the University of Regensburg, Germany.
-
 
 
 <!-- Table of Contents -->
