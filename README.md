@@ -71,7 +71,7 @@ npm install truffle-hdwallet-provider
 **HashedTimelockERC20**
 
 1. ```newSwap(receiver, tokenContract, hashlock, timelock, tokenAmount)``` create a new swap with receiver address, ERC20 token contract address, hashlock, expiry, and number of tokens <br />
-2. ```claim(swapId, seceret)``` receiver can claim tokens by revealing the secret prior to the expiry of the time limit <br />
+2. ```claim(swapId, secret)``` receiver can claim tokens by revealing the secret prior to the expiry of the time limit <br />
 3. ```refund(swapId)``` sender can refund tokens by calling this method after the expiry of the time limit <br />
 
 The HTLCs are already deployed on the public testnetworks Goerli, Rinkeby and Ropsten with the following contract addresses:
@@ -98,8 +98,8 @@ npm install truffle-assertions
 
 To test the cross chain swap, make sure to launch **two ganache blockchains** (double-click on the icon in Windows 10) and set one port number to **7545** and the other to **8545**:
 
-RPC SERVER of the *first* ganache chain: HTTP://127.0.0.1:7545 <br />
-RPC SERVER of the *second* ganache chain: HTTP://127.0.0.1:8545
+RPC SERVER of the **first** ganache chain: HTTP://127.0.0.1:7545 <br />
+RPC SERVER of the **second** ganache chain: HTTP://127.0.0.1:8545
 
 To run the truffle test on ganache, run the following commands for a specific test (at this point truffle does not support running all of the tests in the folder).
 
@@ -110,7 +110,7 @@ $ truffle test ./test/ganache/htlc.js --network development
 End result:
 ```
  Contract: HashedTimelockERC20
-    ✓ getSwap() fails when contract doesn't exist (129ms)
+    ✓ getSwap() fails when swap doesn't exist (129ms)
     setSwap() test different scenarios:
       ✓ setSwap() creates new swap, stores and emits event correctly (992ms)
       ✓ setSwap() should fail with no approvement (233ms)
