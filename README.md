@@ -116,7 +116,7 @@ End result:
       ✓ setSwap() should fail with no approvement (233ms)
       ✓ setSwap() should fail when zero tokens are approved (1062ms)
       ✓ setSwap() should fail when approver has no tokens (529ms)
-      ✓ setSwap() should fail with a duplicate contract request (449ms)
+      ✓ setSwap() should fail with a duplicate swap request (449ms)
       ✓ setSwap() should fail when timelock is in the past (618ms)
     claim() test different scenarions:
       ✓ claim() should send tokens when given the correct secret and emits event correctly (899ms)
