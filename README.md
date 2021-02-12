@@ -263,7 +263,7 @@ $ truffle test ./test/goerli/htlcCrossChainRinkeby.js --network goerli
 
 Final result:
 ```
-  Contract: Test for Cross Chain Swap
+  Contract: Cross-Chain Token Swap on Test Networks Goerli and Rinkeby
     ✓ initialization of web3 for Goerli
     ✓ initialization of web3 for Rinkeby
 Anna goerli: 100
@@ -272,46 +272,46 @@ HTLC goerli: 0
 Ben rinkeby: 100
 Anna rinkeby: 0
 HTLC rinkeby: 0
-    ✓ show balances of Anna and Ben on Goerli and Rinkeby (1501ms)
+    ✓ show balances of Anna and Ben on Goerli and Rinkeby (847ms)
     Anna and Ben do a successful token swap on Goerli and Rinkeby
-0xdba552436da1c542358a19c684be04117a9db55c4a0d25f5f6e9b52779d81cdc (swap id)
-      ✓ approve and setSwap() from Anna works on Goerli (39073ms)
-0x8bf02abf60cd239445f161759ceab5e7e2dcfdbf00636b3df7110bb7fed19c61 (swap id)
-      ✓ approve and setSwap() from Ben works on Rinkeby (27132ms)
-      ✓ claim() Ben Tokens on Rinkeby from Anna works with secret (12215ms)
-      ✓ claim() Anna Tokens on Goerli from Ben works with published secret (17306ms)
+swapId goerli: 0x9a05f1567e0399301590024b0ac68bcef7be9f8a03898962ba634b929a9e9592
+      ✓ approve() and setSwap() from Anna works on Goerli (34422ms)
+swapId rinkeby: 0xc295cb34dece6cb645fa5d4f2a67862d52b4dc0211d4c3234809e424fc21a0ba
+      ✓ approve() and setSwap() from Ben works on Rinkeby (19240ms)
+      ✓ claim() BenERC20 on Rinkeby from Anna works with secret (14975ms)
+      ✓ claim() AnnaERC20 on Goerli from Ben works with published secret (8038ms)
 Anna goerli: 95
 Ben goerli: 5
 HTLC goerli: 0
 Ben rinkeby: 95
 Anna rinkeby: 5
 HTLC rinkeby: 0
-      ✓ final balances of Anna and Ben on Goerli and Rinkeby (980ms)
-    Test if Anna and Ben get refunded
+      ✓ final balances of Anna and Ben on Goerli and Rinkeby (855ms)
+    Anna and Ben get refunded if they don't claim
 Anna goerli: 95
 Ben goerli: 5
 Ben rinkeby: 95
 Anna rinkeby: 5
-      ✓ show balances of Anna and Ben on Goerli and Rinkeby (1054ms)
-0xdc868ba5345f3cc9b5ce378c983041bb70f86804a4dd647170c51e65939c744e (swap id)
-      ✓ approve and setSwap() from Anna works on Goerli (26767ms)
-0x8a429f400ea7ee4fbcf5e3da6a9da701a0f6ccee040fc70fc8391a83578dc5b9 (swap id)
-      ✓ approve and setSwap() from Ben works on Rinkeby (28346ms)
+      ✓ show balances of Anna and Ben on Goerli and Rinkeby (531ms)
+swapId goerli: 0x6c0ab3f71ed8e2f5fad32b19ab90387636cf5b7c2f640952baac9c5f9b68b66b
+      ✓ approve() and setSwap() from Anna works on Goerli (27314ms)
+swapId rinkeby: 0xe3321dc1f34f2011e0b3343304f6c8188227994a87304c1631bf45f3d7ea4a6a
+      ✓ approve() and setSwap() from Ben works on Rinkeby (21368ms)
 Anna goerli: 90
 Ben goerli: 5
 Ben rinkeby: 90
 Anna rinkeby: 5
-      ✓ show balances of Anna and Ben on Goerli and Rinkeby (657ms)
-      ✓ Anna does not claim, so Ben refunds (27194ms)
-      ✓ Anna didnt't claim and refunds (45494ms)
+      ✓ show balances of Anna and Ben on Goerli and Rinkeby (548ms)
+      ✓ Anna does not claim, so Ben refunds his BenERC20 (26759ms)
+      ✓ Anna didnt't claim and refunds her AnnaERC20 (24715ms)
 Anna goerli: 95
 Ben goerli: 5
 Ben rinkeby: 95
 Anna rinkeby: 5
-      ✓ final balances of Anna and Ben on Goerli and Rinkeby (537ms)
+      ✓ final balances of Anna and Ben on Goerli and Rinkeby (688ms)
 
 
-  15 passing (4m)
+  15 passing (7m)
 ```
 
 
