@@ -7,4 +7,5 @@ Coin/node_modules
 node_modules/
 TokenSwap/contracts/build
 secret.json
+/build
 >>>>>>> 8b16584f2e5f6c64aa558344a31a967fcc118f2f
