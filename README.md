@@ -2,12 +2,21 @@
 This project proposes an atomic swap protocol that can be summarized as follows:
 
 it enables an
-- exchange of two different kinds of funds (e.g. tokens) 
+- safe exchange of two ERC-20 tokens
 - with another (unfamiliar) party
-- that possibly is on another blockchain
+- that is on another blockchain
 - following a traceable and comprehensible procedure 
 - without the need for a trusted third party
 
+Atomic swaps incorporate two principles:
+
+1. All swaps happen, when all parties comply to the rules and the specified conditions are met
+2. Everyone is refunded in case of anyone misbehaving
+
+We realize this atomic swap with the use of a Hashed Timelock Contract (HTLC). At its core, our HTLC is an agreement that stores ERC-20 tokens for an arbitrary amount of time while being cryptographically secured. This can be accomplished by hash- and timelocks:
+
+- Hashlock: The hash *H(s)* locks the tokens and to receive the tokens the recipient must provide the secret preimage *s* of *H(s)*  
+- Timelock: During this predetermined amount of time the recipient can claim the tokens and after the timeout elapses the original sender of the tokens can refund 
 
 This project was conducted during the course of our bachelor studies at the University of Regensburg, Germany.
 
@@ -36,9 +45,10 @@ This project was conducted during the course of our bachelor studies at the Univ
 <!-- Projecr Setup-->
 ## Project Setup
 
+
 Fork this repository and cd into it:
 ```
-git clone https://github.com/TuanUR/Projektseminar
+git clone https://github.com/TuanUR/cross-blockchain-token-swap
 
 cd Projektseminar
 ```
@@ -51,13 +61,13 @@ npm install
 ```
 2. truffle (v5.1.53 or above)
 ```
-npm install truffle / npm -i truffle 
+npm install truffle
 ```
-3.  @openzeppelin/contracts, containing the necessary token standards for the usage of ERC-20 tokens
+3.  @openzeppelin/contracts (v3.4.0 or above)
 ```
 npm install @openzeppelin/contracts
 ```
-4. truffle-hdwallet-provider
+4. truffle-hdwallet-provider (v1.0.17 or above)
 ```
 npm install truffle-hdwallet-provider
 ```
@@ -229,29 +239,29 @@ $ truffle test ./test/goerli/htlc.js --network goerli
 Final result:
 ```
   Contract: HashedTimelockERC20 on Test Network Goerli
-    ✓ getSwap() fails when swap doesn't exist (1225ms)
+    ✓ getSwap() fails when swap doesn't exist (827ms)
     setSwap() test different scenarios:
-      ✓ setSwap() creates new swap, stores and emits event correctly (56617ms)
-      ✓ setSwap() should fail with no approvement (25310ms)
-      ✓ setSwap() should fail when zero tokens are approved (45531ms)
-      ✓ setSwap() should fail when approver has no tokens (55508ms)
-      ✓ setSwap() should fail with a duplicate swap request (57997ms)
-      ✓ setSwap() should fail when timelock is in the past (41863ms)
-    claim() test different scenarions:
-      ✓ claim() should send tokens when given the correct secret and emits event correctly (30463ms)
-      ✓ claim() should fail after claimed swap (25361ms)
-      ✓ claim() should fail when given the false secret (75686ms)
-      ✓ claim() should fail if caller is not receiver (15072ms)
-      ✓ claim() should fail after timelock expiry (61874ms)
-    refund() test different secanrios:
-      ✓ refund() should work after timelock expiry and emits event correctly (45405ms)
-      ✓ refund() should fail after refunded swap (27031ms)
-      ✓ refund() should fail before timelock expiry (49914ms)
-      ✓ refund() should fail if caller is not sender (23084ms)
-      ✓ refund() should work after timelock expiry (needed due to a newSwap) (100192ms)
+      ✓ setSwap() creates new swap, stores and emits event correctly (37031ms)
+      ✓ setSwap() should fail with no approvement (28976ms)
+      ✓ setSwap() should fail when zero tokens are approved (29698ms)
+      ✓ setSwap() should fail when approver has no tokens (44919ms)
+      ✓ setSwap() should fail with a duplicate swap request (44567ms)
+      ✓ setSwap() should fail when timelock is in the past (44952ms)
+    claim() test different scenarios:
+      ✓ claim() should send tokens when given the correct secret and emits event correctly (14670ms)
+      ✓ claim() should fail after claimed swap (13210ms)
+      ✓ claim() should fail when given the false secret (60515ms)
+      ✓ claim() should fail if caller is not receiver (15362ms)
+      ✓ claim() should fail after timelock expiry (88244ms)
+    refund() test different scenarios:
+      ✓ refund() should work after timelock expiry and emits event correctly (30420ms)
+      ✓ refund() should fail after refunded swap (29063ms)
+      ✓ refund() should fail before timelock expiry (59448ms)
+      ✓ refund() should fail if caller is not sender (14480ms)
+      ✓ refund() should work after timelock expiry (needed due to a newSwap) (89610ms)
 
 
-  17 passing (14m)
+  17 passing (11m)
 ```
 
 
@@ -337,7 +347,7 @@ truffle(goerli)> htlc.refund("yourSwapId", {from: "receiver.address"})
 
 <!-- Usage -->
 ## Using the DApp
-The decentralized application enables users to interact with their existing swaps. It therefore requires an already set up swap as well as it's swapId (either emitted by newSwap Event or transmitted to the user by someone else). 
+The decentralized application enables users to interact with their existing swaps. It therefore requires an already set up swap as well as its swapId (either by searching the corresponging newSwap event or by being transmitted to the user). 
 Users have the ability to inspect swap details as well as to easily execute the core functions claim() and refund() of the protocol without the need of using the command-line.
 
 ### 1. Startpage
@@ -354,7 +364,7 @@ After hitting the check button, the app will check if the user is either the sen
 The main page displays the general information from the previous page as well as 
 - the swapId entered by the user
 - the timelock progress (= remaining time of timelock in seconds)
-- either possibility to claim or to refund
+- either the possibility to claim or to refund
 
 #### i.) if user is receiver (ability to claim)
 The user can now enter the plaintext secret for the swap. By doing so and hitting "Claim", a pop-up window will appear with all the transaction details. By confirming the pop-up, the transaction gets executed and the user gets the funds that have been locked in the swap.
