@@ -84,24 +84,6 @@ App = {
         })
     },
 
-    // for development only - might delete now
-    testContracts: function ()
-    {
-        console.log("testContracts was executed");
-        var input_address_token = $('#input-address-token').val();
-        //change Coin address to anna or ben token-address if you want to use them instead of testtoken(TTN)
-        App.contracts.Coin.at("0xA5A38796Ec3dF359dB128D10f8385bEf6378A741").then(function (instance) {
-            CoinInstance = instance;
-            var user_account = $('#accountAddress').val();
-            return CoinInstance.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
-        }).then(function (balance) {
-            console.log(balance.toNumber());
-            return CoinInstance.balanceOf("0x31281336c2e70E1D816b0be3f7b036Dbd14308d8");
-        }).then(function (balance) {
-            console.log(balance.toNumber());
-        })
-    },
-
     // render the startpage
     renderStartpage: function () {
         var startpage = $('#startpage');
