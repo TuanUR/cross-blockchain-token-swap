@@ -6,7 +6,6 @@ App = {
     contractAddress: "",
     account: '0x0',
     loading: false,
-    tokenPrice: 0, //not needed?
 
 
     // init app
@@ -157,7 +156,8 @@ App = {
             } else if (App.account === result[1]) {
                 refundPage.hide();
             } else {
-                console.log("Not Sender nor Receiver!");
+                location.reload();
+                alert("Not Sender nor Receiver!");
             }
             loader.hide();
             allContent.show();
@@ -190,7 +190,6 @@ App = {
     refund: function () {
         console.log("Executed refund function");
         const swapId = $("#input-swapId").val();
-        console.log(swapId);
         App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
             return HashedTimelockERC20.refund(swapId, {
                 from: App.account,
@@ -221,17 +220,6 @@ App = {
             var progressPercent = (Math.ceil(remaining) / timelock) * 100;
             $('#progress').css('width', progressPercent + '%');
             $('#remaining-time').html(remaining);
-        })
-    },
-
-
-    // for testing
-    testCall: function () {
-        App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
-            console.log("success");
-            //return HashedTimelockERC20.getContract("0x8c8079aa503f69367cb38778f54ac3a6c8f61a4a1d183b96f9381577353e2e79");
-        }).then(function (result) {
-            console.log(result);
         })
     }
 }
