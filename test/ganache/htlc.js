@@ -3,13 +3,15 @@ const truffleAssert = require('truffle-assertions')
 const HashedTimelockERC20 = artifacts.require("HashedTimelockERC20")
 const AnnaERC20Token = artifacts.require("tokens/AnnaERC20.sol")
 
+// Testing the functionalities and the behavior of the Hashed Timelock Contract in different scenarios
+
 contract("HashedTimelockERC20", accounts => {
     const sender = accounts[0]
     const receiver = accounts[1]
-    const initialSupply = 100
-    const tokenAmount = 10
-    const hashlock = "0x29d47406ac390709745e2da337abc011314b11d53e0a012d9d94590d722c4dee"
-    const secret = "Cross-Blockchain Token Swap mit Ethereum"
+    const initialBalance = 100 // balance of the sender
+    const tokenAmount = 10 // token amount to be put in the swaps
+    const hashlock = "0x29d47406ac390709745e2da337abc011314b11d53e0a012d9d94590d722c4dee" // used by the sender and the receiver
+    const secret = "Cross-Blockchain Token Swap mit Ethereum" // initially only known by the sender
     const timelock1Hour = now() + 3600
 
     const Failed_MSG = "Returned error: VM Exception while processing transaction: revert"
@@ -17,7 +19,9 @@ contract("HashedTimelockERC20", accounts => {
     let htlc
     let token
 
-    let result
+    let swap1Result
+    let swap2Result
+    let swap3Result
 
     before(async () => {
         htlc = await HashedTimelockERC20.new()
@@ -27,10 +31,10 @@ contract("HashedTimelockERC20", accounts => {
     describe("setSwap() test different scenarios: ", () => {
 
         it("setSwap() creates new swap, stores and emits event correctly", async () => {
-            result = await newSwap(timelock1Hour)
-            const swapId = getSwapId(result)
+            swap1Result = await newSwap(timelock1Hour) // create new swap with 1 hour timelock
+            const swapId = getSwapId(swap1Result) // get the swap id from event logs
 
-            truffleAssert.eventEmitted(result, "newSwap", (ev) => {
+            truffleAssert.eventEmitted(swap1Result, "newSwap", (ev) => { // check if newSwap event is emitted correctly
                 return ev.swapId === swapId && 
                 ev.sender === sender && 
                 ev.receiver === receiver &&
@@ -40,9 +44,11 @@ contract("HashedTimelockERC20", accounts => {
                 (ev.timelock).toNumber() === timelock1Hour
             }, "Successful newSwap with correct parameters")
 
-            assertBalances(sender, initialSupply - tokenAmount)
+            // check token balances
+            assertBalances(sender, initialBalance - tokenAmount)
             assertBalances(htlc.address, tokenAmount)
 
+            // check swap record
             const swapArray = await htlc.getSwap.call(swapId);
             const swap = arrayToObject(swapArray)
 
@@ -84,7 +90,7 @@ contract("HashedTimelockERC20", accounts => {
             )
         })
 
-        it("setSwap() should fail with a duplicate contract request", async () => {
+        it("setSwap() should fail with a duplicate swap request", async () => {
             await truffleAssert.reverts(
                 newSwap(timelock1Hour),
                 Failed_MSG,
@@ -105,15 +111,16 @@ contract("HashedTimelockERC20", accounts => {
 
     describe("claim() test different scenarions", () => {
 
-        it("claim() should send tokens when given the correct secret", async () => {
-            const swapId = getSwapId(result)
-            const claim = await htlc.claim(swapId, secret, {from: receiver})
+        it("claim() should send tokens when given the correct secret and emits event correctly", async () => {
+            const swapId = getSwapId(swap1Result) // get swap id from created swap
+            const claim = await htlc.claim(swapId, secret, {from: receiver}) // receiver calls claim with the secret to receive the tokens
 
-            truffleAssert.eventEmitted(claim, "claimedSwap", (ev) => {
+            truffleAssert.eventEmitted(claim, "claimedSwap", (ev) => { // check if claimedSwap event is emitted correctly
                 return ev.swapId === swapId && ev.secret === secret
             }, "Successful claim")
 
-            assertBalances(sender, initialSupply - tokenAmount)
+            // check token balances
+            assertBalances(sender, initialBalance - tokenAmount)
             assertBalances(receiver, tokenAmount)
             assertBalances(htlc.address, 0)
 
@@ -121,12 +128,12 @@ contract("HashedTimelockERC20", accounts => {
             const swap = arrayToObject(swapArray)
 
             assert.equal(swap.secret, secret)
-            assert.isTrue(swap.claimed)
-            assert.isFalse(swap.refunded)
+            assert.isTrue(swap.claimed) // claimed is set true
+            assert.isFalse(swap.refunded) // refunded remains false
         })
 
         it("claim() should fail after claimed swap", async () => {
-            const swapId = getSwapId(result)
+            const swapId = getSwapId(swap1Result)
 
             await truffleAssert.reverts(
                 htlc.claim(swapId, secret, {from: receiver}),
@@ -136,21 +143,21 @@ contract("HashedTimelockERC20", accounts => {
         })
 
         it("claim() should fail when given the false secret", async () => {
-            result = await newSwap(now() + 3) // this newSwap() is used for the next 4 tests
+            swap2Result = await newSwap(now() + 3) // this new swap is used for the next 4 tests
 
-            const swapId = getSwapId(result)
+            const swapId = getSwapId(swap2Result)
             const wrongSecret = "wrong secret"
 
             await truffleAssert.reverts(
                 htlc.claim(swapId, wrongSecret, {from: receiver}),
                 Failed_MSG,
-                "expected failure due to false secret"
+                "expected failure due to wrong secret"
             )
         })
 
         it("claim() should fail if caller is not receiver", async () => {
             const notReceiver = accounts[2];
-            const swapId = getSwapId(result)
+            const swapId = getSwapId(swap2Result)
 
             await truffleAssert.reverts(
                 htlc.claim(swapId, secret, {from: notReceiver}),
@@ -160,9 +167,9 @@ contract("HashedTimelockERC20", accounts => {
         })
 
         it("claim() should fail after timelock expiry", async () => {
-            const swapId = getSwapId(result)
+            const swapId = getSwapId(swap2Result)
 
-            return new Promise((resolve, reject) => setTimeout(async () => {
+            return new Promise((resolve, reject) => setTimeout(async () => { // pause for 5 seconds
                 try{
                     await htlc.claim(swapId, secret, {from: receiver})
                     reject(new Error("expected failure due to claim after timelock expired"))
@@ -170,32 +177,33 @@ contract("HashedTimelockERC20", accounts => {
                     assert.isTrue(error.message.startsWith(Failed_MSG))
                     resolve({message: "success"})
                 }
-            }, 5 * 1000)) // miliseconds 
+            }, 5 * 1000))
         })
 
     })
 
     describe("refund() test different secanrios", () => {
 
-        it("refund() should work after timelock expiry", async () => {
-            const newBalance = initialSupply - tokenAmount
+        it("refund() should work after timelock expiry and emits event correctly", async () => {
+            const newSenderBalance = await token.balanceOf.call(sender) // sender has less tokens after receiver claimed and new swap 
 
-            const swapId = getSwapId(result)
+            const swapId = getSwapId(swap2Result) // get new swap id
 
             return new Promise((resolve, reject) => setTimeout(async () => {
                 try{
-                    const refund = await htlc.refund(swapId, {from: sender})
+                    const refund = await htlc.refund(swapId, {from: sender}) // sender calls refund to retrieve his tokens
 
-                    truffleAssert.eventEmitted(refund, "refundedSwap", (ev) => {
+                    truffleAssert.eventEmitted(refund, "refundedSwap", (ev) => { // check if refundedSwap event is emitted correctly
                         return ev.swapId === swapId
                     }, "Successful refund")
 
-                    assertBalances(sender, newBalance)
+                    assertBalances(sender, newSenderBalance - (-tokenAmount)) // sender should get his tokens back
 
                     const swapArray = await htlc.getSwap.call(swapId)
                     const swap = arrayToObject(swapArray)
-                    assert.isFalse(swap.claimed)
-                    assert.isTrue(swap.refunded)
+
+                    assert.isFalse(swap.claimed) // claimed remains false
+                    assert.isTrue(swap.refunded) // refunded is set to true
                     resolve()
                 } catch(error) {
                     reject(error)
@@ -204,7 +212,7 @@ contract("HashedTimelockERC20", accounts => {
         })
 
         it("refund() should fail after refunded swap", async () => {
-            const swapId = getSwapId(result)
+            const swapId = getSwapId(swap2Result)
 
             await truffleAssert.reverts(
                 htlc.refund(swapId, {from: sender}),
@@ -214,8 +222,8 @@ contract("HashedTimelockERC20", accounts => {
         })
 
         it("refund() should fail before timelock expiry", async () => {
-            result = await newSwap(now() + 500) // this newSwap() is used for the next test
-            const swapId = getSwapId(result)
+            swap3Result = await newSwap(now() + 500) // this new swap is used for the next test
+            const swapId = getSwapId(swap3Result)
 
             await truffleAssert.reverts(
                 htlc.refund(swapId, {from: sender}),
@@ -225,29 +233,31 @@ contract("HashedTimelockERC20", accounts => {
         })
 
         it("refund() should fail if caller is not sender", async() => {
-            const swapId = getSwapId(result)
+            const swapId = getSwapId(swap3Result)
 
             await truffleAssert.reverts(
                 htlc.refund(swapId, {from: receiver}),
                 Failed_MSG,
-                "expected failure due to false sender"
+                "expected failure due to wrong sender"
             )
         })
 
     })
 
-    it("getSwap() fails when contract doesn't exist", async () => {
+    it("getSwap() fails when swap doesn't exist", async () => {
         await truffleAssert.reverts(
             htlc.getSwap.call("0x0"),
             Failed_MSG,
-            "expected failure due to active timelock"
+            "expected failure due non existing swap"
         )
     })
 
+    // Check if token balances are equal
     async function assertBalances(address, amount) {
         return assert.equal(await token.balanceOf.call(address), amount)
     }
 
+    // Helper for setting up a new swap
     async function newSwap(timelockInSeconds) {
         await token.approve(htlc.address, tokenAmount, {from: sender})
         return htlc.setSwap(
@@ -255,14 +265,16 @@ contract("HashedTimelockERC20", accounts => {
           )
     }
 
+    // Helper for an expected failure
     async function failSwap(){
         return htlc.setSwap(
             receiver, token.address, hashlock, timelock1Hour, tokenAmount, {from: sender}
           )
     }
 
+    // Convert array into object
     function arrayToObject(arr) {
-        array = {
+        swapObj = {
             sender: arr[0], 
             receiver: arr[1],
             tokenContract: arr[2],
@@ -273,15 +285,17 @@ contract("HashedTimelockERC20", accounts => {
             claimed: arr[7],
             refunded: arr[8],
         }
-        return array
+        return swapObj
     }
 
+    // Return the current unix epoch time in seconds 
     function now() {
         return Math.floor(Date.now() / 1000)
     }
 
-    function getSwapId(result) {
-        return (result.logs[0].args).swapId
+    // Return the swap id of the given swap
+    function getSwapId(swap) {
+        return (swap.logs[0].args).swapId
     }
-    
+
 })

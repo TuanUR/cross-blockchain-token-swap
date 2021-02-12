@@ -4,8 +4,27 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
+/**
+* Hashed Timelock Contracts (HTLCs) on Ethereum ERC-20 tokens.
+* This HTLC provides a way to swap ERC-20 tokens.
+*
+* Protocol:
+*
+*  1) newSwap(receiver, tokenContract, hashlock, timelock, tokenAmount) 
+*     -> the sender can create a new swap for a given token and token contract
+*        and a 32 byte swap id is returned
+*
+*  2) withdraw(swapId, secret) 
+*     -> once the receiver knows the secret of the hashlock they can claim
+*        the tokens with this function prior to the expiry of the timelock
+*
+*  3) refund(swapId)
+*     -> the sender of the swap can get their tokens back after the timelock has 
+*        expired and if the receiver did not withdraw the tokens
+*/
+
 contract HashedTimelockERC20 {
-    
+
     event newSwap(
         bytes32 indexed swapId,
         address indexed sender,
@@ -16,7 +35,7 @@ contract HashedTimelockERC20 {
         uint256 timelock
     );
 
-    event claimedSwap(bytes32 indexed swapId, string secret);
+    event claimedSwap(bytes32 indexed swapId, string secret); //alternative way to retrieve the secret
 
     event refundedSwap(bytes32 indexed swapId);
 
@@ -39,13 +58,26 @@ contract HashedTimelockERC20 {
         _;
     }
 
-    modifier contractNeitherClaimedNorRefunded(bytes32 _swapId) {
+    modifier swapNeitherClaimedNorRefunded(bytes32 _swapId) {
         require(storedSwaps[_swapId].claimed == false, "swap already claimed");
         require(storedSwaps[_swapId].refunded == false, "swap already refunded");
         _;
     }
 
-    // Set a swap with the receiver, the ERC20 token contract, a sha256 hashed secret, a timelock and the token amount
+/**
+* Sender sets up a new swap depositing the tokens by specifying the receiver and terms
+*
+* NOTE: _receiver must first call approve() on the token contract
+*
+* @param _receiver : Receiver of the tokens
+* @param _tokenContract : ERC-20 Token contract address
+* @param _hashlock : A sha256 hash hashlock
+* @param _timelock : UNIX epoch seconds time that the lock expires at
+*                    Refunds can be made after this time
+* @param _tokenAmount : Number of the token to lock up
+* @return swapId : Id of the new swap needed for subsequent calls
+*
+*/
     function setSwap(
         address _receiver, 
         address _tokenContract, 
@@ -57,12 +89,15 @@ contract HashedTimelockERC20 {
         require(_timelock > block.timestamp, "timelock must be in the future");
         require(_tokenAmount > 0, "token amount must be > 0");
 
+        // Generate random id
         swapId = sha256(abi.encodePacked(msg.sender, _receiver, _tokenContract, _hashlock, _timelock, _tokenAmount));
 
+        // Reject if a swap already exists with the same parameters
         if(storedSwaps[swapId].sender != address(0)){
             revert("Contract already exists, use different parameters, ideally a different hashlock");
         }
 
+        // The HTLC becomes the temporary owner of the tokens
         if(!ERC20(_tokenContract).transferFrom(msg.sender, address(this), _tokenAmount)) {
             revert("transferFrom sender to this failed");
         }
@@ -90,10 +125,17 @@ contract HashedTimelockERC20 {
         );
     }
 
-    // Claim the swap with the id and the secrect within the timelock
+/**
+* Receiver can withdraw the funds once they know the preimage (secret) of the hashlock
+* This will transfer ownership of the locked tokens to their address
+*
+* @param _swapId : Id of the swap to claim from
+* @param _secret : sha256(_secret) should equal the swap hashlock
+* @return bool : true on success
+*/
     function claim(bytes32 _swapId, string memory _secret)
         external
-        contractNeitherClaimedNorRefunded(_swapId)
+        swapNeitherClaimedNorRefunded(_swapId)
         swapExists(_swapId) 
         returns (bool)
     {
@@ -110,10 +152,16 @@ contract HashedTimelockERC20 {
         return true;
     }
 
-    // Refund the swap contract with the swap id after the timelock expires
+/**
+* Sender can retrieve his funds if there was no withdraw and the time lock has expired
+* This will restore ownership of the tokens to the sender
+*
+* @param _swapId : Id of the swap to refund from
+* @return bool : true on success
+*/
     function refund(bytes32 _swapId)
         external
-        contractNeitherClaimedNorRefunded(_swapId)
+        swapNeitherClaimedNorRefunded(_swapId)
         swapExists(_swapId) 
         returns (bool) 
     {
@@ -128,7 +176,12 @@ contract HashedTimelockERC20 {
         return true;
     }
 
-    // Return the swap parameters
+/**
+* Get swap details
+*
+* @param _swapId : Id of the swap to obatin details from
+* return All parameters in struct Swap for _swapId
+*/
     function getSwap(bytes32 _swapId) 
         public
         view   

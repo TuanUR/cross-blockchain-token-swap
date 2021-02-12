@@ -1,8 +1,4 @@
 const HDWalletProvider = require('truffle-hdwallet-provider');
-// const infuraKey = "fj4jll3k.....";
-//
-// const fs = require('fs');
-// const mnemonic = fs.readFileSync(".secret").toString().trim();
 
 const fs = require('fs');
 
@@ -26,12 +22,12 @@ module.exports = {
       provider: () => new HDWalletProvider(secrets.mnemonic, 'https://rinkeby.infura.io/v3/' + secrets.infuraApiKey, 0, 2),
       network_id: '4'
     },
-    development: {
+    development: { // first ganache chain 
       host: "127.0.0.1",
       port: 7545,
       network_id: "*" // Match any network id
     },
-    develop: {
+    develop: { // second ganache chain
       host: "127.0.0.1",
       port: 8545,
       network_id: "*"

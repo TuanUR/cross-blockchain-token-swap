@@ -1,9 +1,7 @@
 <<<<<<< HEAD
-TokenSwap/secret.json
-/secrets.json
-Coin/secret.json
-Coin/build
-Coin/node_modules
+secret.json
 node_modules/
-TokenSwap/contracts/build
+build/
+insert
+test/goerli/htlcCrossChainRopsten.js
 >>>>>>> 8b16584f2e5f6c64aa558344a31a967fcc118f2f
