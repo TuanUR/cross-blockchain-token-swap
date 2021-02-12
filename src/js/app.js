@@ -6,7 +6,6 @@ App = {
     contractAddress: "",
     account: '0x0',
     loading: false,
-    tokenPrice: 0, //not needed?
 
 
     // init app
@@ -16,18 +15,18 @@ App = {
     },
 
     initWeb3: async function () {
-        // Modern dapp browsers...
+        // modern dapp browsers
         if (window.ethereum) {
             App.web3Provider = window.ethereum;
             try {
-                // Request account access
+                // request account access
                 await window.ethereum.enable();
             } catch (error) {
-                // User denied account access...
+                // user denied account access
                 console.error("User denied account access")
             }
         }
-        // Legacy dapp browsers...
+        // in case of legacy dapp browsers
         else if (window.web3) {
             App.web3Provider = window.web3.currentProvider;
         }
@@ -37,7 +36,7 @@ App = {
         }
         web3 = new Web3(App.web3Provider);
         App.network = web3.version.network;
-        // detect network
+        // detect network and set account address accordingly
         switch (App.network) {
             case "1":
                 var net_name = "Main"
@@ -56,6 +55,7 @@ App = {
                 break
             default:
                 net_name = "Unknown / Private"
+                // add your own HTLC address if you're using private network (Ganache etc.)
                 App.contractAddress = "0xc01fE71374ea0C5960f6d1B8cBe2F2E5B2992De0"
         }
         // display current network and htlc details on homepage
@@ -65,7 +65,7 @@ App = {
     },
 
     // instantiate smart contract so web3 knows where to find it and
-    // how it works => enables interacting with Ethereum via web3
+    // enables interacting with Ethereum via web3
     accessContracts: function () {
         $.getJSON('../build/contracts/HashedTimelockERC20.json', function (data) {
             // Get the necessary contract artifact file
@@ -82,22 +82,6 @@ App = {
             });
             return App.renderHomepage();
         })
-        /* try with coin disabled - not needed at all?
-        .done(function () {
-        $.getJSON('../build/contracts/Coin.json', function (data) {
-            var CoinArtifact = data;
-            App.contracts.Coin = TruffleContract(CoinArtifact);
-            App.contracts.Coin.setProvider(App.web3Provider);
-            var input_address_token = $('#input-address-token').val();
-            App.contracts.Coin.at(input_address_token).then(function (Coin) {
-                console.log("Token address: ", Coin.address);
-                return Coin.balanceOf("0x7885c1BFE70624Cf6C83a784dE298AC53CA63CF5");
-            })
-            //  return App.render();
-
-        })
-    });
-    */
     },
 
     // for development only - might delete now
@@ -118,7 +102,7 @@ App = {
         })
     },
 
-    // render the startpage, where the user enters the contract addresses he deployed on the blockchain
+    // render the startpage
     renderStartpage: function () {
         var startpage = $('#startpage');
         var homepage = $('#content');
@@ -128,7 +112,7 @@ App = {
         startpage.show();
         homepage.hide();
 
-        // Load account data and display on startpage (account that is currently used e.g. on MetaMask)
+        // load account data and display on startpage (e.g. account that is currently used on MetaMask)
         web3.eth.getCoinbase(function (err, account) {
             if (err) {
                 console.log(err);
@@ -140,6 +124,7 @@ App = {
         })
     },
 
+    // render main page of the interface
     renderHomepage: function () {
         console.log("Render homepage was executed");
         var startpage = $('#startpage');
@@ -154,10 +139,15 @@ App = {
         homepage.show();
         loader.show();
 
+        // get swapId from user input and also display it on the interface
         var swapId = $("#input-swapId").val();
         $("#swapId-info").html(swapId);
         $("#refund-swapId").html(swapId);
 
+        /*
+        get swap details with getSwap, then determine if user is either sender or receiver of swap
+        and display an according interface
+         */
         App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
             return HashedTimelockERC20.getSwap(swapId);
         }).then(function (result) {
@@ -166,7 +156,8 @@ App = {
             } else if (App.account === result[1]) {
                 refundPage.hide();
             } else {
-                console.log("Not Sender nor Receiver!");
+                location.reload();
+                alert("Not Sender nor Receiver!");
             }
             loader.hide();
             allContent.show();
@@ -174,6 +165,7 @@ App = {
         return App.timelockProgress();
     },
 
+    // execute claim function of underlying HTLC
     claim: function () {
         console.log("Executed claim function");
         const swapId = $("#input-swapId").val();
@@ -194,10 +186,10 @@ App = {
         });
     },
 
+    // execute refund function of underlying HTLC
     refund: function () {
         console.log("Executed refund function");
         const swapId = $("#input-swapId").val();
-        console.log(swapId);
         App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
             return HashedTimelockERC20.refund(swapId, {
                 from: App.account,
@@ -212,14 +204,7 @@ App = {
         });
     },
 
-    // shows the timelock in percent in the progress bar on the homepage
-    //FIXME: fires metamask transaction, that has to be confirmed specifically
-
-    //idea: use getContract(contractId).call() to not need a pop up window (web3 function)
-    //then calculate remaining time by using date.now() somehow
-    //timelock - date.now() = remaining time 
-    //timelock should be result[6]
-
+    //TODO [IDEA]: implement a progress bar that shows timelock expiry in percent
     timelockProgress: function () {
         console.log("timelockProgress was executed");
         const swapId = $("#input-swapId").val();
@@ -235,15 +220,6 @@ App = {
             var progressPercent = (Math.ceil(remaining) / timelock) * 100;
             $('#progress').css('width', progressPercent + '%');
             $('#remaining-time').html(remaining);
-        })
-    },
-
-    testCall: function () {
-        App.contracts.HashedTimelockERC20.at(App.contractAddress).then(function (HashedTimelockERC20) {
-            console.log("success");
-            //return HashedTimelockERC20.getContract("0x8c8079aa503f69367cb38778f54ac3a6c8f61a4a1d183b96f9381577353e2e79");
-        }).then(function (result) {
-            console.log(result);
         })
     }
 }
