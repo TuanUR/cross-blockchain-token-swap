@@ -61,7 +61,10 @@ npm install @openzeppelin/contracts
 ```
 npm install truffle-hdwallet-provider
 ```
-
+5. web3
+```
+npm install web3
+```
 
 <!-- Interface -->
 ## HTLC Interface
