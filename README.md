@@ -144,7 +144,7 @@ End result:
       ✓ 1) Anna initiates a swap with Ben (1005ms)
       ✓ 2) Ben responds and set ups a swap with Anna (2047ms)
       ✓ 3) Anna claims the Ben tokens with the secret (1571ms)
-      ✓ 4) Ben claims the Anna tokens after seeing the publicly avaible secret (1276ms)
+      ✓ 4) Ben claims the Anna tokens after seeing the publicly available secret (1276ms)
     Test the refund scenario:
       ✓ 1) Anna initiates a swap with Ben (475ms)
       ✓ 2) Ben responds and set ups a swap with Anna (568ms)
@@ -166,7 +166,7 @@ End result:
       ✓ 1) Anna initiates a swap with Ben (560ms)
       ✓ 2) Ben responds and set ups a swap with Anna (1165ms)
       ✓ 3) Anna claims the Ben tokens with the secret (712ms)
-      ✓ 4) Ben claims the Anna tokens after seeing the publicly avaible secret (372ms)
+      ✓ 4) Ben claims the Anna tokens after seeing the publicly available secret (372ms)
     Test the refund scenario:
       ✓ Cross chain swap is set up with 5sec timeout on both sides (6855ms)
 
@@ -181,7 +181,7 @@ End result:
 
 ##### Configuration
 
-Add ```secret.json``` with the corresponding values for the hd-wallet-provider and the tests:-
+Add ```secret.json``` with the corresponding values for the hd-wallet-provider and the tests:
 ```
 {
     "mnemonic": "your mnemonic",  
