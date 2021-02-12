@@ -1,8 +1,15 @@
 # Cross-Blockchain Token-Swap with Ethereum
-This is a comprehensible swap protocol that enables exchanging assets on and between different blockchains on the Ethereum network with the help of Hashed Timelock Contracts (HTLC).
+This project proposes an atomic swap protocol that can be summarized as follows:
+
+it enables an
+- exchange of two different kinds of funds (e.g. tokens) 
+- with another (unfamiliar) party
+- that possibly is on another blockchain
+- following a traceable and comprehensible procedure 
+- without the need for a trusted third party
+
 
 This project was conducted during the course of our bachelor studies at the University of Regensburg, Germany.
-
 
 
 <!-- Table of Contents -->
@@ -29,8 +36,6 @@ This project was conducted during the course of our bachelor studies at the Univ
 <!-- Projecr Setup-->
 ## Project Setup
 
-
-### todo
 Fork this repository and cd into it:
 ```
 git clone https://github.com/TuanUR/Projektseminar
@@ -64,7 +69,7 @@ npm install truffle-hdwallet-provider
 **HashedTimelockERC20**
 
 1. ```newSwap(receiver, tokenContract, hashlock, timelock, tokenAmount)``` create a new swap with receiver address, ERC20 token contract address, hashlock, expiry, and number of tokens <br />
-2. ```claim(swapId, seceret)``` receiver can claim tokens by revealing the secret prior to the expiry of the time limit <br />
+2. ```claim(swapId, secret)``` receiver can claim tokens by revealing the secret prior to the expiry of the time limit <br />
 3. ```refund(swapId)``` sender can refund tokens by calling this method after the expiry of the time limit <br />
 
 The HTLCs are already deployed on the public testnetworks Goerli, Rinkeby and Ropsten with the following contract addresses:
@@ -91,8 +96,8 @@ npm install truffle-assertions
 
 To test the cross chain swap, make sure to launch **two ganache blockchains** (double-click on the icon in Windows 10) and set one port number to **7545** and the other to **8545**:
 
-RPC SERVER of the *first* ganache chain: HTTP://127.0.0.1:7545 <br />
-RPC SERVER of the *second* ganache chain: HTTP://127.0.0.1:8545
+RPC SERVER of the **first** ganache chain: HTTP://127.0.0.1:7545 <br />
+RPC SERVER of the **second** ganache chain: HTTP://127.0.0.1:8545
 
 To run the truffle test on ganache, run the following commands for a specific test (at this point truffle does not support running all of the tests in the folder).
 
@@ -103,13 +108,13 @@ $ truffle test ./test/ganache/htlc.js --network development
 End result:
 ```
  Contract: HashedTimelockERC20
-    ✓ getSwap() fails when contract doesn't exist (129ms)
+    ✓ getSwap() fails when swap doesn't exist (129ms)
     setSwap() test different scenarios:
       ✓ setSwap() creates new swap, stores and emits event correctly (992ms)
       ✓ setSwap() should fail with no approvement (233ms)
       ✓ setSwap() should fail when zero tokens are approved (1062ms)
       ✓ setSwap() should fail when approver has no tokens (529ms)
-      ✓ setSwap() should fail with a duplicate contract request (449ms)
+      ✓ setSwap() should fail with a duplicate swap request (449ms)
       ✓ setSwap() should fail when timelock is in the past (618ms)
     claim() test different scenarions:
       ✓ claim() should send tokens when given the correct secret and emits event correctly (899ms)
@@ -137,7 +142,7 @@ End result:
       ✓ 1) Anna initiates a swap with Ben (1005ms)
       ✓ 2) Ben responds and set ups a swap with Anna (2047ms)
       ✓ 3) Anna claims the Ben tokens with the secret (1571ms)
-      ✓ 4) Ben claims the Anna tokens after seeing the publicly avaible secret (1276ms)
+      ✓ 4) Ben claims the Anna tokens after seeing the publicly available secret (1276ms)
     Test the refund scenario:
       ✓ 1) Anna initiates a swap with Ben (475ms)
       ✓ 2) Ben responds and set ups a swap with Anna (568ms)
@@ -159,7 +164,7 @@ End result:
       ✓ 1) Anna initiates a swap with Ben (560ms)
       ✓ 2) Ben responds and set ups a swap with Anna (1165ms)
       ✓ 3) Anna claims the Ben tokens with the secret (712ms)
-      ✓ 4) Ben claims the Anna tokens after seeing the publicly avaible secret (372ms)
+      ✓ 4) Ben claims the Anna tokens after seeing the publicly available secret (372ms)
     Test the refund scenario:
       ✓ Cross chain swap is set up with 5sec timeout on both sides (6855ms)
 
@@ -174,7 +179,7 @@ End result:
 
 ##### Configuration
 
-Add ```secret.json``` with the corresponding values for the hd-wallet-provider and the tests:-
+Add ```secret.json``` with the corresponding values for the hd-wallet-provider and the tests:
 ```
 {
     "mnemonic": "your mnemonic",  
@@ -256,7 +261,7 @@ $ truffle test ./test/goerli/htlcCrossChainRinkeby.js --network goerli
 
 Final result:
 ```
-  Contract: Test for Cross Chain Swap
+  Contract: Cross-Chain Token Swap on Test Networks Goerli and Rinkeby
     ✓ initialization of web3 for Goerli
     ✓ initialization of web3 for Rinkeby
 Anna goerli: 100
@@ -265,46 +270,46 @@ HTLC goerli: 0
 Ben rinkeby: 100
 Anna rinkeby: 0
 HTLC rinkeby: 0
-    ✓ show balances of Anna and Ben on Goerli and Rinkeby (1501ms)
+    ✓ show balances of Anna and Ben on Goerli and Rinkeby (847ms)
     Anna and Ben do a successful token swap on Goerli and Rinkeby
-0xdba552436da1c542358a19c684be04117a9db55c4a0d25f5f6e9b52779d81cdc (swap id)
-      ✓ approve and setSwap() from Anna works on Goerli (39073ms)
-0x8bf02abf60cd239445f161759ceab5e7e2dcfdbf00636b3df7110bb7fed19c61 (swap id)
-      ✓ approve and setSwap() from Ben works on Rinkeby (27132ms)
-      ✓ claim() Ben Tokens on Rinkeby from Anna works with secret (12215ms)
-      ✓ claim() Anna Tokens on Goerli from Ben works with published secret (17306ms)
+swapId goerli: 0x9a05f1567e0399301590024b0ac68bcef7be9f8a03898962ba634b929a9e9592
+      ✓ approve() and setSwap() from Anna works on Goerli (34422ms)
+swapId rinkeby: 0xc295cb34dece6cb645fa5d4f2a67862d52b4dc0211d4c3234809e424fc21a0ba
+      ✓ approve() and setSwap() from Ben works on Rinkeby (19240ms)
+      ✓ claim() BenERC20 on Rinkeby from Anna works with secret (14975ms)
+      ✓ claim() AnnaERC20 on Goerli from Ben works with published secret (8038ms)
 Anna goerli: 95
 Ben goerli: 5
 HTLC goerli: 0
 Ben rinkeby: 95
 Anna rinkeby: 5
 HTLC rinkeby: 0
-      ✓ final balances of Anna and Ben on Goerli and Rinkeby (980ms)
-    Test if Anna and Ben get refunded
+      ✓ final balances of Anna and Ben on Goerli and Rinkeby (855ms)
+    Anna and Ben get refunded if they don't claim
 Anna goerli: 95
 Ben goerli: 5
 Ben rinkeby: 95
 Anna rinkeby: 5
-      ✓ show balances of Anna and Ben on Goerli and Rinkeby (1054ms)
-0xdc868ba5345f3cc9b5ce378c983041bb70f86804a4dd647170c51e65939c744e (swap id)
-      ✓ approve and setSwap() from Anna works on Goerli (26767ms)
-0x8a429f400ea7ee4fbcf5e3da6a9da701a0f6ccee040fc70fc8391a83578dc5b9 (swap id)
-      ✓ approve and setSwap() from Ben works on Rinkeby (28346ms)
+      ✓ show balances of Anna and Ben on Goerli and Rinkeby (531ms)
+swapId goerli: 0x6c0ab3f71ed8e2f5fad32b19ab90387636cf5b7c2f640952baac9c5f9b68b66b
+      ✓ approve() and setSwap() from Anna works on Goerli (27314ms)
+swapId rinkeby: 0xe3321dc1f34f2011e0b3343304f6c8188227994a87304c1631bf45f3d7ea4a6a
+      ✓ approve() and setSwap() from Ben works on Rinkeby (21368ms)
 Anna goerli: 90
 Ben goerli: 5
 Ben rinkeby: 90
 Anna rinkeby: 5
-      ✓ show balances of Anna and Ben on Goerli and Rinkeby (657ms)
-      ✓ Anna does not claim, so Ben refunds (27194ms)
-      ✓ Anna didnt't claim and refunds (45494ms)
+      ✓ show balances of Anna and Ben on Goerli and Rinkeby (548ms)
+      ✓ Anna does not claim, so Ben refunds his BenERC20 (26759ms)
+      ✓ Anna didnt't claim and refunds her AnnaERC20 (24715ms)
 Anna goerli: 95
 Ben goerli: 5
 Ben rinkeby: 95
 Anna rinkeby: 5
-      ✓ final balances of Anna and Ben on Goerli and Rinkeby (537ms)
+      ✓ final balances of Anna and Ben on Goerli and Rinkeby (688ms)
 
 
-  15 passing (4m)
+  15 passing (7m)
 ```
 
 

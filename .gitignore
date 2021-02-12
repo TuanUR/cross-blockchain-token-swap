@@ -1,7 +1,9 @@
 <<<<<<< HEAD
 secret.json
 node_modules/
+<<<<<<< HEAD
 build/
 insert
 test/goerli/htlcCrossChainRopsten.js
+>>>>>>> 7cdf60a191234c6317376baa449ce1e4f805bc7d
 >>>>>>> 8b16584f2e5f6c64aa558344a31a967fcc118f2f

@@ -19,7 +19,7 @@
             <h1 class="text-center">Cross-Blockchain Token Swap</h1>
             <br/>
             <div class="introduction text-center">
-                <p class="welcome">Welcome to the Hashed Timelock Cross-Blockchain Token-Swap (HTLC)</p>
+                <p class="welcome">Welcome to the Hashed Timelock Cross-Blockchain Token-Swap </p>
                 <p>You are signed in with account : <span id="accountAddress"></span>
                 </p>
                 <p>You are on network: <span id="currentNetwork"></span>
@@ -33,17 +33,18 @@
         </div>
         <div id="startpage" class="text-center">
             <p>Enter details below to proceed to the swap functions</p>
+            <label for="input-swapId">swapId (emitted by setSwap function):</label>
             <form onSubmit="App.accessContracts(); return false;" role="form">
                 <div class="form-group">
-                    <div class="input-group">
-                        <label for="input-swapId">swapId (emitted by setSwap function):</label>
-                        <input id="input-swapId" class="form-control input-lg" type="text" placeholder="0x0"
-                               value="0xdfd9e2edf9179fbedab1b0175a36a73485c4bacdab292885868599c62b815057"/>
-                        <span class="input-group-btn" >
-                            <!--implement link to success page with contract details?-->
-                            <button id="interact" type="submit" class="btn"><i class="fa fa-check-circle"></i></button>
-                        </span>
-
+                    <div class="col-lg-12">
+                        <div class="input-group" style="padding-left: 20px;">
+                            <input id="input-swapId" name="input-swapId" class="form-control input-lg" type="text" placeholder="0x0"
+                            />
+                            <span class="input-group-btn">
+                                <!--implement link to success page with contract details?-->
+                                <button id="interact" type="submit" class="btn btn-default input-lg"><i class="fa fa-check-circle"></i></button>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -60,7 +61,7 @@
                 <p>Remaining time (seconds):
                     <span id="remaining-time"></span>
                 </p>
-                <!--
+                <!--TODO [IDEA]: progress bar of timelock in percent
                 <div class="progress">
                     <div id="progress" class="progress-bar progress-bar-striped-active"
                          aria-valuemin="0" aria-valuemax="100">
