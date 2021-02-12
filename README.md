@@ -36,8 +36,6 @@ This project was conducted during the course of our bachelor studies at the Univ
 <!-- Projecr Setup-->
 ## Project Setup
 
-
-### todo
 Fork this repository and cd into it:
 ```
 git clone https://github.com/TuanUR/Projektseminar
