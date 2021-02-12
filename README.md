@@ -1,7 +1,7 @@
 # Cross-Blockchain Token-Swap with Ethereum
 This project proposes an atomic swap protocol that can be summarized as follows:
 
-it enables an
+it enables a
 - safe exchange of two ERC-20 tokens
 - with another (unfamiliar) party
 - that is on another blockchain
@@ -13,9 +13,9 @@ Atomic swaps incorporate two principles:
 1. All swaps happen, when all parties comply to the rules and the specified conditions are met
 2. Everyone is refunded in case of anyone misbehaving
 
-We realize this atomic swap with the use of a Hashed Timelock Contract (HTLC). At its core, our HTLC is an agreement that stores ERC-20 tokens for an arbitrary amount of time while being cryptographically secured. This can be accomplished by hash- and timelocks:
+We realize this atomic swap with a Hashed Timelock Contract (HTLC). At its core, our HTLC is an agreement that stores ERC-20 tokens for an arbitrary amount of time while being cryptographically secured. This can be accomplished by hash- and timelocks:
 
-- Hashlock: The hash *H(s)* locks the tokens and to receive the tokens the recipient must provide the secret preimage *s* of *H(s)*  
+- Hashlock: The hash *H(s)* locks the tokens and the recipient must provide the secret preimage *s* of *H(s)* to receive the tokens
 - Timelock: During this predetermined amount of time the recipient can claim the tokens and after the timeout elapses the original sender of the tokens can refund 
 
 This project was conducted during the course of our bachelor studies at the University of Regensburg, Germany.
@@ -50,7 +50,7 @@ Fork this repository and cd into it:
 ```
 git clone https://github.com/TuanUR/cross-blockchain-token-swap
 
-cd Projektseminar
+cd cross-blockchain-token-swap
 ```
 
 
@@ -71,7 +71,7 @@ npm install @openzeppelin/contracts
 ```
 npm install truffle-hdwallet-provider
 ```
-5. web3
+5. web3 (v1.3.4 or above)
 ```
 npm install web3
 ```
@@ -150,7 +150,7 @@ Command for on-chain token swap test:
 ```
 End result:
 ```
-    Contract: HashedTimelock On Chain Swap between two ERC20 Tokens
+    Contract: HashedTimelock On-Chain Swap between two ERC20 Tokens
     Test the swap scencario:
       ✓ 1) Anna initiates a swap with Ben (1005ms)
       ✓ 2) Ben responds and set ups a swap with Anna (2047ms)
@@ -171,7 +171,7 @@ Command for cross-chain token swap test:
 ```
 End result:
 ```
-    Contract: HashedTimelock Cross Chain Swap between two ERC20 Tokens
+    Contract: HashedTimelock Cross-Chain Swap between two ERC20 Tokens
     ✓ Anna and Ben have the right balances on their chain (387ms)
     Test the swap scencario:
       ✓ 1) Anna initiates a swap with Ben (560ms)
@@ -179,7 +179,7 @@ End result:
       ✓ 3) Anna claims the Ben tokens with the secret (712ms)
       ✓ 4) Ben claims the Anna tokens after seeing the publicly available secret (372ms)
     Test the refund scenario:
-      ✓ Cross chain swap is set up with 5sec timeout on both sides (6855ms)
+      ✓ Cross-chain swap is set up with 5sec timeout on both sides (6855ms)
 
 
   6 passing (14s)
@@ -205,7 +205,7 @@ Add ```secret.json``` with the corresponding values for the hd-wallet-provider a
 
 ##### Prerequisites
 
-Deploy the ERC-20 token contracts ```Coin.sol``` together with ```AnnaERC20.sol``` on **Goerli** and ```BenERC20.sol``` on **Rinkeby** in the contracts folder. Note that you should comment the specific ```deployer.deploy(contract.sol)``` out before launching these contracts on the network. Additionally, after deploying the ```BenERC20.sol``` move all of the tokens from the contract to the other account: 
+Deploy the ERC-20 token contracts ```Coin.sol``` together with ```AnnaERC20.sol``` on **Goerli** and ```BenERC20.sol``` on **Rinkeby** in the contracts folder. Note that you should comment the specific ```deployer.deploy(contract.sol)``` out before launching these contracts on the network. Additionally, after deploying the ```BenERC20.sol``` move all of the tokens assigned to the deployer account to the **other** account: 
 
 ```
 $ truffle migrate --network goerli
@@ -220,13 +220,13 @@ The outcome should look like this:
 
 **Goerli**
 
-1. Acc: 100 AnnaERC20 tokens
-2. Acc: 0 AnnaERC20 tokens
+1. Account: 100 AnnaERC20 tokens
+2. Account: 0 AnnaERC20 tokens
 
 **Rinkeby**
 
-1. Acc: 0 BenERC20 tokens
-2. Acc: 100 BenERC20 tokens
+1. Account: 0 BenERC20 tokens
+2. Account: 100 BenERC20 tokens
 
 
 #### HTLC Test
@@ -347,12 +347,12 @@ truffle(goerli)> htlc.refund("yourSwapId", {from: "receiver.address"})
 
 <!-- Usage -->
 ## Using the DApp
-The decentralized application enables users to interact with their existing swaps. It therefore requires an already set up swap as well as its swapId (either by searching the corresponging newSwap event or by being transmitted to the user). 
+The decentralized application enables users to interact with their existing swaps. It therefore requires an already set up swap as well as its swapId (either by searching the corresponding newSwap event or by being transmitted to the user). 
 Users have the ability to inspect swap details as well as to easily execute the core functions claim() and refund() of the protocol without the need of using the command-line.
 
 ### 1. Startpage
 
-The startpage of the interface displays relevant information, which includes the user's accounts address, the network he is currently on and the address of the HTLC the DApp is executing. 
+The startpage of the interface displays relevant information, which includes the user's account address, the network he is currently on and the address of the HTLC the DApp is executing. 
 Please note that if you're using a private network, you should add the contract address of your own HTLC in the source code. The same applies if you want to abstain from using the provided HTLCs at the previously mentioned addresses.
 
 ![Bildschirmfoto 2021-02-05 um 16 40 02](https://user-images.githubusercontent.com/64489139/107055186-4f3aa000-67d1-11eb-85c5-2b66e3f4b8e2.png)
